@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<phpunit>
+  <testsuites>
+    <testsuite name="Version tools">
+      <file>versionComparatorTest.php</file>
+    </testsuite>
+  </testsuites>
+</phpunit>

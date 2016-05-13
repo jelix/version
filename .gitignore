@@ -1,0 +1,6 @@
+TAGS
+.DS_Store
+*.komodoproject
+.komodotools
+vendor/
+composer.lock
