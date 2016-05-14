@@ -106,24 +106,6 @@ class VersionComparator {
         elseif($n[2] == '') $n[2] = 'zzz';
     }
 
-    static public function getBranchVersion($version) {
-      $v = explode('.', $version);
-      $r = '/^([0-9]+)([a-zA-Z]*|pre|-?dev)([0-9]*)(pre|-?dev)?$/';
-      if (count($v) < 2)
-        $v[1] = '0';
-
-      if (!preg_match($r, $v[0], $m)) {
-        return $version;
-      }
-
-      $version = $m[1];
-
-      if (!preg_match($r, $v[1], $m)) {
-        return $version.'.0';
-      }
-
-      return $version.'.'.$m[1];
-    }
 
     /**
      * create a string representing a version number in a manner that it could
