@@ -8,7 +8,7 @@
 * @since 1.2
 */
 
-use Jelix\VersionUtils\VersionComparator as jVersionComparator;
+use Jelix\Version\VersionComparator as jVersionComparator;
 
 class versionComparatorTest extends PHPUnit_Framework_TestCase {
 

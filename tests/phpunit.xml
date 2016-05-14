@@ -2,6 +2,7 @@
 <phpunit>
   <testsuites>
     <testsuite name="Version tools">
+      <file>parserTest.php</file>
       <file>versionComparatorTest.php</file>
     </testsuite>
   </testsuites>

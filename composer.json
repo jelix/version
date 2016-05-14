@@ -1,8 +1,8 @@
 {
-    "name": "jelix/version-utils",
+    "name": "jelix/version",
     "type": "library",
-    "description": "classes to manipulate and compare versions",
-    "keywords": ["version"],
+    "description": "Classes to parse and compare versions. It supports any version syntax, including semantic versions",
+    "keywords": ["version", "semver", "composer"],
     "homepage": "http://jelix.org",
     "license": "MIT",
     "authors": [
@@ -22,7 +22,7 @@
     },
     "autoload": {
         "psr-4" : {
-            "Jelix\\VersionUtils\\" : "lib/"
+            "Jelix\\Version\\" : "lib/"
         }
     },
     "minimum-stability": "stable"

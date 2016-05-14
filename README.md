@@ -1,20 +1,41 @@
-Class to compare version
+Classes to parse and compare versions. It supports any version syntax, including
+semantic versions.
 
 # installation
 
 You can install it from Composer. In your project:
 
 ```
-composer require "jelix/inifile"
+composer require "jelix/version"
 ```
 
 # Usage
+
+## Parsing
+
+Use the `Jelix\Version\Parser` class to retrieve a `Jelix\Version\Version` object
+containing all versions informations.
+
+```php
+$version = Jelix\Version\Parser::parse('1.2.3b2');
+
+$version->toString(); // '1.2.3-beta.2'
+$version->getMajor(); // 1
+$version->getMinor(); // 2
+$version->getPatch(); // 3
+$version->getStabilityVersion(); // array('beta', '2')
+
+$version->getNextMajorVersion(); // '2.0.0'
+$version->getNextMinorVersion(); // '1.3.0'
+$version->getNextPatchVersion(); // '1.2.4'
+$version->getBranchVersion(); // '1.2'
+```
 
 ## Simple comparison
 
 
 ```php
-\Jelix\VersionUtils\VersionComparator::compareVersion($v1, $v2);
+\Jelix\Version\VersionComparator::compareVersion($v1, $v2);
 ```
 
 `compareVersion()` returns:

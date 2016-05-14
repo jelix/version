@@ -3,9 +3,9 @@
 * @author      Laurent Jouanneau
 * @copyright   2008-2016 Laurent Jouanneau
 * @link        http://www.jelix.org
-* @licence     GNU Lesser General Public Licence see LICENCE file or http://www.gnu.org/licenses/lgpl.html
+* @licence     MIT
 */
-namespace Jelix\VersionUtils;
+namespace Jelix\Version;
 
 /**
  * class to compare version numbers. it supports the following keywords:
@@ -219,6 +219,8 @@ class VersionComparator {
                     $op = versionRangeUnaryOperator::OP_DIFF;
                     break;
                 case '~':
+                    // ~1.2 is equivalent to >=1.2 <2.0.0
+                    // ~1.2.3 is equivalent to >=1.2.3 <1.3.0
                     $exp1 = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_GTE, $m[2]);
                     $v2 = explode('.', $m[2]);
                     $v2 = (intval($v2[0])+1).".0pre";
@@ -233,11 +235,21 @@ class VersionComparator {
     }
 }
 
+interface VersionRangeOperatorInterface {
+    /**
+     * @return boolean
+     */
+    function compare($value);
+}
+
+
 /**
  * Represents a binary operator (AND or OR) in a version range expression
  */
-class versionRangeBinaryOperator {
+class versionRangeBinaryOperator implements VersionRangeOperatorInterface {
+
     const OP_OR = 0;
+
     const OP_AND = 1;
 
     protected $op = -1;
@@ -246,7 +258,12 @@ class versionRangeBinaryOperator {
 
     protected $right = null;
 
-    function __construct($operator, $left, $right) {
+    /**
+     * @param integer $operator  one of OP_*
+     */
+    function __construct($operator,
+                         VersionRangeOperatorInterface $left,
+                         VersionRangeOperatorInterface $right) {
         $this->op = $operator;
         $this->left = $left;
         $this->right = $right;
@@ -275,7 +292,7 @@ class versionRangeBinaryOperator {
 /**
  * Represents an unary operator (>,<,=,!=,<=,>=,~) in a version range expression
  */
-class versionRangeUnaryOperator {
+class versionRangeUnaryOperator implements VersionRangeOperatorInterface {
     const OP_EQ = 0;
     const OP_LT = 1;
     const OP_GT = 2;
@@ -287,6 +304,10 @@ class versionRangeUnaryOperator {
 
     protected $operand = null;
 
+    /**
+     * @param integer $operator  one of OP_*
+     * @param string $operand  the version used to compare
+     */
     function __construct($operator, $operand) {
         $this->op = $operator;
         $this->operand = $operand;
