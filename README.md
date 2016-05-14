@@ -1,5 +1,5 @@
 Classes to parse and compare versions. It supports any version syntax, including
-semantic versions.
+semantic versions. Comparator supports Composer version constraints.
 
 # installation
 
@@ -59,32 +59,36 @@ It supports also version wilcards: 1.*, 1.2.*
 Example to compare two versions:
 
 ```php
-\Jelix\VersionUtils\VersionComparator::compareVersion('1.2pre','1.2RC');
+\Jelix\Version\VersionComparator::compareVersion('1.2pre','1.2RC');
 ```
 
 To compare two versions with a wildcard:
 
 ```php
-\Jelix\VersionUtils\VersionComparator::compareVersion('1.1.*','1.1'); // returns 0 
-\Jelix\VersionUtils\VersionComparator::compareVersion('1.1.*','1.1.1'); // returns 0
-\Jelix\VersionUtils\VersionComparator::compareVersion('1.1.*','1.1.2'); // returns 0
-\Jelix\VersionUtils\VersionComparator::compareVersion('1.2.*','1.1.2'); // returns 1
+\Jelix\Version\VersionComparator::compareVersion('1.1.*','1.1'); // returns 0 
+\Jelix\Version\VersionComparator::compareVersion('1.1.*','1.1.1'); // returns 0
+\Jelix\Version\VersionComparator::compareVersion('1.1.*','1.1.2'); // returns 0
+\Jelix\Version\VersionComparator::compareVersion('1.2.*','1.1.2'); // returns 1
 ```
 
 
 ## Comparison with range
 
-`compareVersionRange()` allows you to use operator to compare version. 
+`compareVersionRange()` allows you to use operator to compare version. It
+is compatible with version constraints supported by Composer.
 
-- `=`, `>`, `<`, `>=`, `<=`, `=`, `!=`
+- `>`, `<`, `>=`, `<=`, `=`, `!=`
 - `~` : specify a range between the version and the next major version
 
-You can combine several constraints with `,` (AND) and '|' (OR).
+You can combine several constraints with boolean operators :
+
+- AND operator: `,` or ` `
+- OR operator: '||' or '|'.
 
 
 ```php
 // check if 0.5 is between 0.8 and 1.0 or if it is higher than 2.0
-\Jelix\VersionUtils\VersionComparator::compareVersionRange('0.5','<1.0,>0.8|>2.0');
+\Jelix\Version\VersionComparator::compareVersionRange('0.5','<1.0,>0.8|>2.0');
 ```
 
 

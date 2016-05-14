@@ -1,7 +1,7 @@
 {
     "name": "jelix/version",
     "type": "library",
-    "description": "Classes to parse and compare versions. It supports any version syntax, including semantic versions",
+    "description": "Classes to parse and compare versions. It supports any version syntax, including semantic versions. Comparator supports Composer version constraints.",
     "keywords": ["version", "semver", "composer"],
     "homepage": "http://jelix.org",
     "license": "MIT",

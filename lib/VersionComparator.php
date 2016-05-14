@@ -94,11 +94,14 @@ class VersionComparator {
             $n[3] = '';
             $n[4] = 'dev';
         }
-        if (!isset($n[4]))
+        if (!isset($n[4])) {
             $n[4] = '';
+        }
         else {
             $n[4] = strtolower($n[4]);
-            if ($n[4] == 'pre' || $n[4] == '-dev' ) $n[4] = 'dev';
+            if ($n[4] == 'pre' || $n[4] == '-dev' ) {
+                $n[4] = 'dev';
+            }
         }
 
         if ($n[2] == 'a') $n[2] = 'alpha';
@@ -166,14 +169,29 @@ class VersionComparator {
         return $expression->compare($version);
     }
 
+    /**
+     * @return VersionRangeOperatorInterface
+     */
     static protected function compileRange($range) {
-        $or = preg_split('/\|/',$range, 2);
+        $or = preg_split('/\s*\|\|\s*/',$range, 2);
         if (count($or) > 1) {
             $left = self::compileRange($or[0]);
             $right = self::compileRange($or[1]);
             return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_OR, $left, $right);
         }
-        $and = preg_split("/,/",$range, 2);
+        $or = preg_split('/\s*\|\s*/',$range, 2);
+        if (count($or) > 1) {
+            $left = self::compileRange($or[0]);
+            $right = self::compileRange($or[1]);
+            return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_OR, $left, $right);
+        }
+        $and = preg_split("/\s*,\s*/",$range, 2);
+        if (count($and) > 1) {
+            $left = self::compileRange($and[0]);
+            $right = self::compileRange($and[1]);
+            return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
+        }
+        $and = preg_split("/(?<!-)\s+(?!-)/",$range, 2);
         if (count($and) > 1) {
             $left = self::compileRange($and[0]);
             $right = self::compileRange($and[1]);
