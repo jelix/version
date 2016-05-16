@@ -10,7 +10,7 @@
 namespace Jelix\Version;
 
 /**
- * Embed version informations
+ * Embed version informations.
  */
 class Version
 {
@@ -21,11 +21,11 @@ class Version
     private $buildMetadata = '';
 
     /**
-     * @param  integer[] $version  list of numbers of the version
-     *    (ex: [1,2,3] for 1.2.3)
+     * @param int[]    $version          list of numbers of the version
+     *                                   (ex: [1,2,3] for 1.2.3)
      * @param string[] $stabilityVersion list of stability informations
-     *     that are informations following a '-' in a semantic version
-     *    (ex: ['alpha', '2'] for 1.2.3-alpha.2)
+     *                                   that are informations following a '-' in a semantic version
+     *                                   (ex: ['alpha', '2'] for 1.2.3-alpha.2)
      * @param string  build metadata  the metadata, informations that
      *  are after a '+' in a semantic version
      *     (ex: 'build-56458' for 1.2.3-alpha.2+build-56458)
@@ -45,10 +45,10 @@ class Version
     }
 
     /**
-     * @param boolean $withPatch  true, it returns always x.y.z even
-     *                            if no patch or minor version was given
+     * @param bool $withPatch true, it returns always x.y.z even
+     *                        if no patch or minor version was given
      */
-    public function toString($withPatch=true)
+    public function toString($withPatch = true)
     {
         $version = $this->version;
         if ($withPatch && count($version) < 3) {
@@ -71,7 +71,8 @@ class Version
         return $this->version[0];
     }
 
-    public function hasMinor() {
+    public function hasMinor()
+    {
         return isset($this->version[1]);
     }
 
@@ -80,10 +81,12 @@ class Version
         if (isset($this->version[1])) {
             return $this->version[1];
         }
+
         return 0;
     }
 
-    public function hasPatch() {
+    public function hasPatch()
+    {
         return isset($this->version[2]);
     }
 
@@ -92,6 +95,7 @@ class Version
         if (isset($this->version[2])) {
             return $this->version[2];
         }
+
         return 0;
     }
 
@@ -104,7 +108,8 @@ class Version
         return array();
     }
 
-    public function getVersionArray() {
+    public function getVersionArray()
+    {
         return $this->version;
     }
 
@@ -127,6 +132,7 @@ class Version
      * Returns the next major version
      * 2.1.3 -> 3.0.0
      * 2.1b1.4 -> 3.0.0.
+     *
      * @return string the next version
      */
     public function getNextMajorVersion()
@@ -139,6 +145,7 @@ class Version
      * 2.1.3 -> 2.2
      * 2.1 -> 2.2
      * 2.1b1.4 -> 2.2.
+     *
      * @return string the next version
      */
     public function getNextMinorVersion()
@@ -150,6 +157,7 @@ class Version
      * Returns the next patch version
      * 2.1.3 -> 2.1.4
      * 2.1b1.4 -> 2.2.
+     *
      * @return string the next version
      */
     public function getNextPatchVersion()
@@ -161,7 +169,8 @@ class Version
      * returns the next version, by incrementing the last
      * number, whatever it is.
      * If the version has a stability information (alpha, beta etc..),
-     * it returns only the version without stability version
+     * it returns only the version without stability version.
+     *
      * @return string the next version
      */
     public function getNextTailVersion()
@@ -170,8 +179,8 @@ class Version
             return implode('.', $this->version);
         }
         $v = $this->version;
-        $v[count($v)-1]++;
+        ++$v[count($v) - 1];
+
         return implode('.', $v);
     }
-
 }

@@ -46,12 +46,10 @@ class Parser
                                         );
                     $vers = array_slice($vers, 0, $k + 1);
                     break;
-                }
-                else if ($number == '*') {
+                } elseif ($number == '*') {
                     $vers = array_slice($vers, 0, $k);
                     break;
-                }
-                else {
+                } else {
                     throw new \Exception('Bad version syntax');
                 }
             } else {
