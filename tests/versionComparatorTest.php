@@ -9,6 +9,8 @@
 */
 
 use Jelix\Version\VersionComparator;
+use Jelix\Version\Parser;
+use Jelix\Version\Version;
 
 class versionComparatorTest extends PHPUnit_Framework_TestCase {
 
@@ -54,15 +56,6 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(-1,'1.2a','1.2b'),
             array(-1,'1.2b','1.2rc'),
             array(-1,'1.2rc','1.2'),
-            array(0,'1.*','1'),
-            array(0,'1.1.*','1.1.1'),
-            array(0,'1.1.2','1.1.*'),
-            array(0,'1.1.*','1.1'),
-            array(0,'1.1','1.1.*'),
-            array(-1,'1.1.*','1.2'),
-            array(-1,'1.1','1.2.*'),
-            array(0,'1.1','*'),
-            array(0,'*','1.1'),
         );
     }
 
@@ -74,9 +67,11 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         // -1 : v1 < v2
         // 1 : v1 > v2
 
-        $this->assertEquals($result, VersionComparator::compareVersion($v1,$v2));
+        //$this->assertEquals($result, VersionComparator::compareVersion($v1,$v2));
+        $v1 = Parser::parse($v1);
+        $v2 = Parser::parse($v2);
+        $this->assertEquals($result, VersionComparator::compare($v1,$v2));
     }
-
 
     protected function _compare($v1, $v2) {
         $v1 = VersionComparator::serializeVersion($v1);
@@ -198,9 +193,29 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(false,    '2.0',  '~1.3'),
             array(false,    '2.5',  '~1.3'),
             array(false,    '2.0b', '~1.3'),
+            array(false,     '1.5',  '^1.3'),
+            array(false,     '1.9',  '^1.3'),
+            array(true,     '1.3',  '^1.3'),
+            array(true,     '1.3.2',  '^1.3'),
+            array(false,     '1.4.0',  '^1.3'),
+            array(false,    '1.2',  '^1.3'),
+            array(false,    '2.0',  '^1.3'),
+            array(false,    '2.5',  '^1.3'),
+            array(false,    '2.0b', '^1.3'),
+            array(true,     '1.3.2',  '^1.3.2'),
+            array(false,     '1.3.1',  '^1.3.2'),
+            array(true,     '1.3.3',  '^1.3.2'),
+            array(false,     '1.4.0',  '^1.3.2'),
             array(true,     '1.1',  '>1.0,<2.0'),
             array(true,     '2.3',  '<1.0||>2.0'),
             array(false,    '1.5',  '<1.0||>2.0'),
+            array(true,     '1.0',  '1.0 - 2.0'),
+            array(true,     '1.1',  '1.0 - 2.0'),
+            array(true,     '2.0',  '1.0 - 2.0'),
+            array(true,     '2.0-beta',  '1.0 - 2.0'),
+            array(false,     '0.9',  '1.0 - 2.0'),
+            array(true,     '2.0.1',  '1.0 - 2.0'),
+            array(false,     '2.0.1',  '1.0 - 2.0.0'),
             array(true,     '0.9',  '<1.0 , >0.8||>2.0'),
             array(true,     '0.9.9','<1.0 >0.8 || >2.0'),
             array(true,     '2.1',  '<1.0 >0.8 |>2.0'),
@@ -210,13 +225,21 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(false,    '0.5',  '<1.0,>0.8||>2.0'),
             array(false,    '1.5',  '<1.0,>0.8||>2.0'),
             array(true,     '0.9',  '<1.0,>0.8||>2.0.*,<2.5.4||>3.0'),
-            array(true,     '2.0.1',    '<1.0,>0.8||>=2.0.*,<2.5.4||>3.0'),
+            array(true,     '2.0.1','<1.0,>0.8||>=2.0.*,<2.5.4||>3.0'),
             array(true,     '2.3',  '<1.0,>0.8||>2.0.*,<2.5.4||>3.0'),
             array(true,     '3.1',  '<1.0,>0.8||>2.0.*,<2.5.4||>3.0'),
             array(false,    '0.7',  '<1.0,>0.8||>2.0.*,<2.5.4||>3.0'),
             array(false,    '1.3',  '<1.0,>0.8||>2.0.*,<2.5.4||>3.0'),
             array(false,    '2.5.4','<1.0,>0.8||>2.0.*,<2.5.4||>3.0'),
             array(false,    '2.9',  '<1.0,>0.8||>2.0.*,<2.5.4||>3.0'),
+
+            array(true, '1','1.*'),
+            array(true,'1.1.1','1.1.*'),
+            array(true,'1.1.2','1.1.*'),
+            array(true,'1.1','1.1.*'),
+            array(false,'1.2','1.1.*'),
+            array(false,'1.1','1.2.*'),
+            array(true,'1.1','*'),
         );
     }
     /**
