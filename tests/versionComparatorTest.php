@@ -232,7 +232,8 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(false,    '1.3',  '<1.0,>0.8||>2.0.*,<2.5.4||>3.0'),
             array(false,    '2.5.4','<1.0,>0.8||>2.0.*,<2.5.4||>3.0'),
             array(false,    '2.9',  '<1.0,>0.8||>2.0.*,<2.5.4||>3.0'),
-
+            array(true, '1.7.0pre.0', '1.4pre - 1.7.0pre.*'),
+            array(true, '1.7.0pre.0', '>=1.4pre <=1.7.0pre.*'),
             array(true, '1','1.*'),
             array(true,'1.1.1','1.1.*'),
             array(true,'1.1.2','1.1.*'),
