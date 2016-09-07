@@ -4,3 +4,4 @@ TAGS
 .komodotools
 vendor/
 composer.lock
+.idea

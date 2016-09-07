@@ -241,6 +241,7 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(false,'1.2','1.1.*'),
             array(false,'1.1','1.2.*'),
             array(true,'1.1','*'),
+            array(true,'0.3.2','0.3.*'),
         );
     }
     /**
