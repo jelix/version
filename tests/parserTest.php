@@ -37,6 +37,7 @@ class parserTest extends PHPUnit_Framework_TestCase {
             array('1.2.3a1pre', 1, 2, 3, array(), array('alpha','1','pre'), '', '1.2.3-alpha.1.pre', '1.2.3'),
             array('1.2RC-dev',  1, 2, 0, array(), array('rc','dev'), '', '1.2.0-rc.dev', '1.2'),
             array('1.2b2pre.4+2.3.4foo', 1, 2, 0, array(), array('beta','2','pre', '4'), '2.3.4foo', '1.2.0-beta.2.pre.4+2.3.4foo', '1.2'),
+            array('1.2-3.5.2', 1, 2, 0, array(), array('3', '5', '2'), '', '1.2.0-3.5.2', '1.2'),
         );
     }
 
@@ -61,6 +62,7 @@ class parserTest extends PHPUnit_Framework_TestCase {
             array('1', '2.0.0', '1.1.0', '1.0.1', '1.0' ),
             array('1.2', '2.0.0', '1.3.0', '1.2.1', '1.2' ),
             array('1.2.3.4', '2.0.0', '1.3.0', '1.2.4', '1.2' ),
+            array('1.2-3.5.2', '2.0.0', '1.3.0', '1.2.1', '1.2' ),
         );
     }
 

@@ -64,6 +64,9 @@ class VersionComparator
         }
 
         foreach ($s1 as $k => $v) {
+            if ($v == '*' || $s2[$k] == '*') {
+                return 0;
+            }
             if ($v === $s2[$k]) {
                 continue;
             }
@@ -90,13 +93,12 @@ class VersionComparator
                     if ($v1 < $v2) {
                         return -1;
                     }
-
                     return 1;
                 } else {
-                    return -1;
+                    return 1;
                 }
             } elseif (is_numeric($s2[$k])) {
-                return 1;
+                return -1;
             } else {
                 if ($v == 'dev' || $v == 'pre') {
                     $v = 'aaaaaaaaaa';
@@ -252,21 +254,21 @@ class VersionComparator
 
             return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_OR, $left, $right);
         }
-        $and = preg_split("/\s*,\s*/", $range, 2);
+        $and = preg_split("/\\s*,\\s*/", $range, 2);
         if (count($and) > 1) {
             $left = self::compileRange($and[0]);
             $right = self::compileRange($and[1]);
 
             return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
         }
-        $and = preg_split("/(?<!-)\s+(?!-)/", $range, 2);
+        $and = preg_split("/(?<!-)\\s+(?!-)/", $range, 2);
         if (count($and) > 1) {
             $left = self::compileRange($and[0]);
             $right = self::compileRange($and[1]);
 
             return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
         }
-        $between = preg_split("/\s+\-\s+/", $range, 2);
+        $between = preg_split("/\\s+\\-\\s+/", $range, 2);
         if (count($between) > 1) {
             // 1.0 - 2.0 is equivalent to >=1.0.0 <2.1
             // 1.0.0 - 2.1.0 is equivalent to >=1.0.0 <=2.1.0
@@ -286,7 +288,7 @@ class VersionComparator
             return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
         }
         $val = trim($range);
-        if (preg_match("/^([\!>=<~^]+)(.*)$/", $val, $m)) {
+        if (preg_match("/^([\\!>=<~^]+)(.*)$/", $val, $m)) {
             switch ($m[1]) {
                 case '=':
                     $op = versionRangeUnaryOperator::OP_EQ;

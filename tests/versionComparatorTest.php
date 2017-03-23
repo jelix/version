@@ -56,6 +56,17 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(-1,'1.2a','1.2b'),
             array(-1,'1.2b','1.2rc'),
             array(-1,'1.2rc','1.2'),
+            array(-1,'1.2-3.0','1.2-3.1'),
+            array(1,'1.2-3.0','1.2'),
+            array(-1,'1.2-3.0','1.3'),
+            array(0,'1.2-3.0','1.2-3'),
+            array(0,'1.2-3','1.2-3.0.0'),
+            array(1,'1.2-3.0','1.2-2.9'),
+            array(-1,'1.2-3.0','1.2.1-3.0'),
+            array(-1,'1.2-3.0','1.2.1-1'),
+            array(1,'1.2-3.0','1.2-alpha.2'),
+            array(1,'1.2-3.0','1.2-beta.2'),
+            array(1,'1.2-3.0','1.2-rc.2'),
         );
     }
 
@@ -107,6 +118,7 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('001z99z.001z99z.0000000001z99z.0000000000a00a', VersionComparator::serializeVersion('1.1.1'));
         $this->assertEquals('001z99z.001z99z.0000000002z99z.0000000000a00a', VersionComparator::serializeVersion('1.1.2'));
         $this->assertEquals('001z99z.000a00a.0000000000a00a.0000000000a00a', VersionComparator::serializeVersion('1.*'));
+        //$this->assertEquals('001z99z.002a99z.0000000000a00a.0000000000a00a', VersionComparator::serializeVersion('1.2-1.0'));
     }
 
     public function testCompareSerializedVersion() {
