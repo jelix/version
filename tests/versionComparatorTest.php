@@ -85,8 +85,8 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
     }
 
     protected function _compare($v1, $v2) {
-        $v1 = VersionComparator::serializeVersion($v1);
-        $v2 = VersionComparator::serializeVersion($v2);
+        $v1 = VersionComparator::serializeVersion2($v1);
+        $v2 = VersionComparator::serializeVersion2($v2);
         if ($v1 == $v2)
             return 0;
         if ($v1 < $v2)
@@ -94,8 +94,8 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         return 1;
     }
     protected function _comparer($v1, $v2) {
-        $v1 = VersionComparator::serializeVersion($v1);
-        $v2 = VersionComparator::serializeVersion($v2,1);
+        $v1 = VersionComparator::serializeVersion2($v1);
+        $v2 = VersionComparator::serializeVersion2($v2,1);
         if ($v1 == $v2)
             return 0;
         if ($v1 < $v2)
@@ -103,8 +103,8 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         return 1;
     }
     protected function _comparel($v1, $v2) {
-        $v1 = VersionComparator::serializeVersion($v1,-1);
-        $v2 = VersionComparator::serializeVersion($v2);
+        $v1 = VersionComparator::serializeVersion2($v1,-1);
+        $v2 = VersionComparator::serializeVersion2($v2);
         if ($v1 == $v2)
             return 0;
         if ($v1 < $v2)
@@ -118,7 +118,25 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('001z99z.001z99z.0000000001z99z.0000000000a00a', VersionComparator::serializeVersion('1.1.1'));
         $this->assertEquals('001z99z.001z99z.0000000002z99z.0000000000a00a', VersionComparator::serializeVersion('1.1.2'));
         $this->assertEquals('001z99z.000a00a.0000000000a00a.0000000000a00a', VersionComparator::serializeVersion('1.*'));
-        //$this->assertEquals('001z99z.002a99z.0000000000a00a.0000000000a00a', VersionComparator::serializeVersion('1.2-1.0'));
+    }
+
+    public function getSerialResult()
+    {
+        return array(
+            array('1.2alpha', 'z001z002z0000000000z0000000000z0000000000-a000z000z0000000000z0000000000z0000000000-z000z000z0000000000z0000000000z0000000000'),
+            array('1.1', 'z001z001z0000000000z0000000000z0000000000-z000z000z0000000000z0000000000z0000000000-z000z000z0000000000z0000000000z0000000000'),
+            array('1.1.1.4.5', 'z001z001z0000000001z0000000004z0000000005-z000z000z0000000000z0000000000z0000000000-z000z000z0000000000z0000000000z0000000000'),
+            array('1.1.2-dev.3-pre', 'z001z001z0000000002z0000000000z0000000000-_000z003z0000000000z0000000000z0000000000-_000z000z0000000000z0000000000z0000000000'),
+            array('1.2.*', 'z001z002z0000000000z0000000000z0000000000-z000z000z0000000000z0000000000z0000000000-z000z000z0000000000z0000000000z0000000000'),
+            array('1.2RC2', 'z001z002z0000000000z0000000000z0000000000-r000z002z0000000000z0000000000z0000000000-z000z000z0000000000z0000000000z0000000000'),
+        );
+    }
+
+    /**
+     * @dataProvider getSerialResult
+     */
+    public function testSerialization2($version, $serial) {
+        $this->assertEquals($serial, VersionComparator::serializeVersion2($version));
     }
 
     public function testCompareSerializedVersion() {

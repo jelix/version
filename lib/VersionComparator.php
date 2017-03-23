@@ -172,13 +172,15 @@ class VersionComparator
      * be easily to be compared with an other serialized version. useful to
      * do comparison in a database for example.
      *
+     * It doesn't support all version notation. Use serializeVersion2 instead.
+     *
      * @param int $starReplacement 1 if it should replace by max value, 0 for min value
+     * @deprecated
      */
     public static function serializeVersion($version, $starReplacement = 0, $pad = 4)
     {
         $vers = explode('.', $version);
         $r = '/^([0-9]+)([a-zA-Z]*|pre|-?dev)([0-9]*)(pre|-?dev)?$/';
-
         $sver = '';
 
         foreach ($vers as $k => $v) {
@@ -215,6 +217,51 @@ class VersionComparator
         }
 
         return $sver;
+    }
+
+    /**
+     * create a string representing a version number in a manner that it could
+     * be easily to be compared with an other serialized version. useful to
+     * do comparison in a database for example.
+     *
+     * @param int $starReplacement 1 if it should replace '*' by max value, 0 for min value
+     */
+    public static function serializeVersion2($version, $starReplacement = 0, $maxpad = 10)
+    {
+        $version = preg_replace("/([0-9])([a-z])/i", "\\1-\\2", $version);
+        $version = preg_replace("/([a-z])([0-9])/i", "\\1.\\2", $version);
+        $extensions = explode('-', $version, 3);
+        $serial = '';
+        $extensions = array_pad($extensions, 3, '0');
+        foreach ($extensions as $ext) {
+            $vers = explode('.', $ext);
+            $vers = array_pad($vers, 5, "0");
+
+            foreach($vers as $k => $v) {
+                $pad = ($k > 1 ? $maxpad : 3);
+                if ($v == '*') {
+                    if ($starReplacement > 0) {
+                        $vers[$k] = ($k > 1 ? 'z9999999999' : 'z999');
+                    } else {
+                        $vers[$k] = ($k > 1 ? 'z0000000000' : 'z000');
+                    }
+                }
+                else if (is_numeric($v)) {
+                    $vers[$k] = 'z'.str_pad($v, $pad, '0', STR_PAD_LEFT);
+                }
+                else if ($v == 'dev' || $v == 'pre') {
+                    $vers[$k] = '_'.str_pad('', $pad, '0');
+                }
+                else {
+                    $vers[$k] = strtolower(substr($v, 0, 1)).str_repeat('0', $pad);
+                }
+            }
+            if ($serial) {
+                $serial .= '-';
+            }
+            $serial .= implode('', $vers);
+        }
+        return $serial;
     }
 
     /**
