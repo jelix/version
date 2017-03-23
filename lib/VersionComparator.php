@@ -1,7 +1,7 @@
 <?php
 /**
 * @author      Laurent Jouanneau
-* @copyright   2008-2016 Laurent Jouanneau
+* @copyright   2008-2017 Laurent Jouanneau
 *
 * @link        http://www.jelix.org
 * @licence     MIT
@@ -14,8 +14,6 @@ namespace Jelix\Version;
  * "pre", "-dev", "b", "beta", "a", "alpha".
  * It supports also the "*" wilcard. This wilcard must be the last part
  * of the version number.
- *
- * @since 1.2
  */
 class VersionComparator
 {
