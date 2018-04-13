@@ -200,7 +200,7 @@ class VersionComparator
                 }
                 $sver .= $m[1].$m[2].$m[3].$m[4];
             } else {
-                throw new \Exception('bad version number');
+                throw new \Exception("version number '" . $version . "' cannot be serialized");
             }
         }
         for ($i = $k + 1; $i < $pad; ++$i) {

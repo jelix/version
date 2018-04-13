@@ -69,6 +69,10 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(1,'1.2-3.0','1.2-rc.2'),
             array(1, '3.0.6-1.2.0.20161107145649', '3.0.5-1.2.0.20161107145649'),
             array(1, '3.0.6-1.2.0.20161107145649', '3.0.6-1.2.0.20161107145648'),
+            array(1, '3.2.0-beta.1.1.3.11.20180413165539', '3.2.0-beta.1.1.3.11.20180413165538'),
+            array(-1, '3.2.0-beta.1.1.3.11.20180413165538', '3.2.0-beta.1.1.3.11.20180413165539'),
+            array(1, '3.2.0-beta.1-1.3.11.20180413165539', '3.2.0-beta.1-1.3.11.20180413165538'),
+            array(-1, '3.2.0-beta.1-1.3.11.20180413165538', '3.2.0-beta.1-1.3.11.20180413165539'),
         );
     }
 
@@ -131,6 +135,9 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array('1.1.2-dev.3-pre', 'z001z001z0000000002z0000000000z0000000000-_000z003z0000000000z0000000000z0000000000-_000z000z0000000000z0000000000z0000000000'),
             array('1.2.*', 'z001z002z0000000000z0000000000z0000000000-z000z000z0000000000z0000000000z0000000000-z000z000z0000000000z0000000000z0000000000'),
             array('1.2RC2', 'z001z002z0000000000z0000000000z0000000000-r000z002z0000000000z0000000000z0000000000-z000z000z0000000000z0000000000z0000000000'),
+            array('3.2.0-beta.1.1.3.11.20180413165538', 'z003z002z0000000000z0000000000z0000000000-b000z001z0000000001z0000000003z0000000011z20180413165538-z000z000z0000000000z0000000000z0000000000'),
+            array('3.2.0-beta.1.1.3.11.20180413165539', 'z003z002z0000000000z0000000000z0000000000-b000z001z0000000001z0000000003z0000000011z20180413165539-z000z000z0000000000z0000000000z0000000000'),
+            array('3.2.0-beta.1-1.3.11.20180413165538', 'z003z002z0000000000z0000000000z0000000000-b000z001z0000000000z0000000000z0000000000-z001z003z0000000011z20180413165538z0000000000'),
         );
     }
 
@@ -176,7 +183,9 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(-1, $this->_compare('1.2b2pre','1.2b2-dev.9'));
         $this->assertEquals(-1, $this->_compare('1.2RC1','1.2RC2'));
         $this->assertEquals(0, $this->_compare('1.2.3a1pre','1.2.3a1-dev'));
-        
+
+        $this->assertEquals(-1, $this->_compare('3.2pre171102','3.2pre180212'));
+
         $this->assertEquals(-1, $this->_compare('1.2RC-dev','1.2RC'));
         $this->assertEquals(1, $this->_compare('1.2RC','1.2RC-dev'));
 
@@ -200,6 +209,12 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(-1, $this->_compare('1.2a','1.2b'));
         $this->assertEquals(-1, $this->_compare('1.2b','1.2rc'));
         $this->assertEquals(-1, $this->_compare('1.2rc','1.2'));
+
+
+        $this->assertEquals(-1, $this->_compare('3.2.0-beta.1.1.3.11.20180413165538','3.2.0-beta.1.1.3.11.20180413165539'));
+        $this->assertEquals(-1, $this->_compare('3.2.0-beta.1-1.3.11.20180413165538','3.2.0-beta.1-1.3.11.20180413165539'));
+        $this->assertEquals(1, $this->_compare('3.2.0-beta.1.1.3.11.20180413165538','3.2.0-beta.1.1.3.11.20180413165537'));
+        $this->assertEquals(1, $this->_compare('3.2.0-beta.1-1.3.11.20180413165538','3.2.0-beta.1-1.3.11.20180413165537'));
     }
 
     public function getCompareVersionRange() {
