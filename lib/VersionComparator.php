@@ -114,6 +114,19 @@ class VersionComparator
             }
         }
 
+        $sv1 = $version1->getSecondaryVersion();
+        $sv2 = $version2->getSecondaryVersion();
+        if (($sv1 instanceof Version) || ($sv2 instanceof Version)) {
+            if (($sv1 instanceof Version) && ($sv2 instanceof Version)) {
+                return self::compare($sv1, $sv2);
+            }
+            else if ($sv1 instanceof Version) {
+                return 1;
+            }
+            else if ($sv2 instanceof Version) {
+                return -1;
+            }
+        }
         return 0;
     }
 
@@ -222,10 +235,21 @@ class VersionComparator
      * be easily to be compared with an other serialized version. useful to
      * do comparison in a database for example.
      *
+     * It does not serialize secondary versions, so you should serialize them separatly.
+     * 
+     * @param string $version
      * @param int $starReplacement 1 if it should replace '*' by max value, 0 for min value
      */
     public static function serializeVersion2($version, $starReplacement = 0, $maxpad = 10)
     {
+        // remove meta data
+        $vers = explode('+', $version, 2);
+        $version = $vers[0];
+
+        // remove secondary version
+        $allVersions = preg_split('/(-|:)([0-9]+)($|\.|-)/', $version, 2, PREG_SPLIT_DELIM_CAPTURE);
+        $version = $allVersions[0];
+
         $version = preg_replace("/([0-9])([a-z])/i", "\\1-\\2", $version);
         $version = preg_replace("/([a-z])([0-9])/i", "\\1.\\2", $version);
         $extensions = explode('-', $version, 3);
@@ -266,19 +290,34 @@ class VersionComparator
     }
 
     /**
-     * @param string $version a version number
+     * Compare a version with a given range.
+     * 
+     * It does not compare with secondary version.
+     * 
+     * @param string|Version $version a version number
      * @param string $range   a version expression respecting Composer range syntax
      *
      * @return bool true if the given version match the given range
      */
     public static function compareVersionRange($version, $range)
     {
-        if ($version == $range || $range == '' || $version == '') {
+
+        if ($range == '' || $version == '') {
+            return true;
+        }
+
+        if (is_string($version)) {
+            $v1 = Parser::parse($version);
+        }
+        else {
+            $v1 = $version;
+        }
+
+        if ($v1->toString(true, false) == $range) {
             return true;
         }
 
         $expression = self::compileRange($range);
-        $v1 = Parser::parse($version);
 
         return $expression->compare($v1);
     }

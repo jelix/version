@@ -81,6 +81,9 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(-1, '3.2.0-beta.1.1.3.11.20180413165538', '3.2.0-beta.1.1.3.11.20180413165539'),
             array(1, '3.2.0-beta.1-1.3.11.20180413165539', '3.2.0-beta.1-1.3.11.20180413165538'),
             array(-1, '3.2.0-beta.1-1.3.11.20180413165538', '3.2.0-beta.1-1.3.11.20180413165539'),
+            array(-1, '3.1.11-1.3.11.20180323171329', '3.2.0-pre.1.3.11.20180409175020'),
+            array(0, '3.2beta2-1.4.0.20180516172314', '3.2-beta.2-1.4.0.20180516172314'),
+
         );
     }
 
@@ -229,9 +232,9 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
 
 
         $this->assertEquals(-1, $this->_compare('3.2.0-beta.1.1.3.11.20180413165538','3.2.0-beta.1.1.3.11.20180413165539'));
-        $this->assertEquals(-1, $this->_compare('3.2.0-beta.1-1.3.11.20180413165538','3.2.0-beta.1-1.3.11.20180413165539'));
+        $this->assertEquals(0, $this->_compare('3.2.0-beta.1-1.3.11.20180413165538','3.2.0-beta.1-1.3.11.20180413165539'));
         $this->assertEquals(1, $this->_compare('3.2.0-beta.1.1.3.11.20180413165538','3.2.0-beta.1.1.3.11.20180413165537'));
-        $this->assertEquals(1, $this->_compare('3.2.0-beta.1-1.3.11.20180413165538','3.2.0-beta.1-1.3.11.20180413165537'));
+        $this->assertEquals(0, $this->_compare('3.2.0-beta.1-1.3.11.20180413165538','3.2.0-beta.1-1.3.11.20180413165537'));
     }
 
     public function getCompareVersionRange() {
@@ -311,6 +314,9 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(true, '3.0.5-1.2.0.20161107145649', '>=3.0.5-1.2.0.20161107145648'),
             array(true, '3.0.5-1.2.0.20161107145649', '>=3.0.4-1.2.0.20161107145648'),
             array(false, '3.0.5-1.2.0.20161107145649', '>=3.0.6-1.2.0.20161107145648'),
+            array(true, '3.2beta2-1.4.0.20180516172314', '3.2.0-pre.*'),
+            array(true, '3.2beta2-1.4.0.20180516172314', '3.2*'),
+            //array(true, '3.22-1.4.0.20180516172314', '3.2*'),
         );
     }
     /**

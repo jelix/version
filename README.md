@@ -1,4 +1,4 @@
-This PHP library parse any version syntax, including semantic version. It allows
+This PHP library parse any version syntax, including [semantic version](https://semver.org). It allows
 also to compare versions, using Composer version constraints syntax.
 
 # installation
@@ -39,6 +39,29 @@ Example of supported version syntaxes:
 - 1.2RC, 1.2-rc.4.5
 - 1.2-dev, 1.2b1-dev, 1.2b1-dev.9, 1.2RC-dev, 1.2RC2-dev.1700
 
+The parser support also 'secondary versions', i.e. versions appended to a version
+after a `-` or a `:`. 
+
+Ex: `1.2.3-1.4.5`, `1.2.3:1.4.5`. Here, `1.4.5` is a secondary version.
+
+When retrieving a `Version` object for such versions, you can access to the secondary
+version through a method `getSecondaryVersion()` which returns a `Version` object:
+
+```php
+$version = Jelix\Version\Parser::parse('1.2.3:1.4.5');
+
+$version->toString(); // '1.2.3:1.4.5'
+$version->toString(true, false); // '1.2.3'
+
+$version2 = $version->getSecondaryVersion();
+$version2->toString(); // '1.4.5'
+
+$version->getNextMajorVersion(); // '2.0.0'
+$version->getNextMinorVersion(); // '1.3.0'
+$version->getNextPatchVersion(); // '1.2.4'
+$version->getBranchVersion(); // '1.2'
+
+```
 
 ## Simple comparison
 
@@ -59,6 +82,14 @@ Example to compare two versions:
 ```php
 \Jelix\Version\VersionComparator::compareVersion('1.2pre','1.2RC');
 ```
+
+Secondary versions are also compared if primary versions are equals.
+In this case, if one of the version string does not contain a
+secondary version, then it is considered having the '0.0' version number,
+so it is considered as lower version than the version having a secondary
+version.
+
+
 
 ## Comparison with range
 
@@ -99,9 +130,25 @@ You can combine several constraints with boolean operators :
 \Jelix\Version\VersionComparator::compareVersionRange('1.3.0', '>=1.2.*'); // returns true
 ```
 
+Note: comparison with a range is done only on primary version. If a version string contains
+a secondary version, this secondary version is not compared. To compare a secondary version
+with a range, you should retrieve the secondary version with the `getSecondaryVersion()` method.
+
+```php
+$version = Jelix\Version\Parser::parse('1.2.3:1.0.0');
+
+\Jelix\Version\VersionComparator::compareVersionRange($version, '>=1.2.*'); // returns true
+
+$version2 = $version->getSecondaryVersion();
+$version2->toString(); // '1.0.0'
+
+\Jelix\Version\VersionComparator::compareVersionRange($version2, '>=1.2.*'); // returns false
+
+```
+
 
 # History
 
-Ancester of these classes has been included for years into the [Jelix Framework](http://jelix.org)
+Ancesters of these classes have been included for years into the [Jelix Framework](http://jelix.org)
 until Jelix 1.6, and has been released in 2016 into a separate repository.
 

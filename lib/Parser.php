@@ -1,7 +1,7 @@
 <?php
 /**
 * @author      Laurent Jouanneau
-* @copyright   2016 Laurent Jouanneau
+* @copyright   2016-2018 Laurent Jouanneau
 *
 * @link        http://www.jelix.org
 * @licence     MIT
@@ -24,16 +24,34 @@ class Parser
      */
     public static function parse($version)
     {
+        // extract meta data
         $vers = explode('+', $version, 2);
         $metadata = '';
         if (count($vers) > 1) {
             $metadata = $vers[1];
         }
-        $vers = explode('-', $vers[0], 2);
+        $version = $vers[0];
+
+        // extract secondary version
+        $allVersions = preg_split('/(-|:)([0-9]+)($|\.|-)/', $version, 2, PREG_SPLIT_DELIM_CAPTURE);
+        $version = $allVersions[0];
+        if (count($allVersions) > 1 && $allVersions[1] != '') {
+            $secondaryVersion = self::parse($allVersions[2].$allVersions[3].$allVersions[4]);
+            $secondaryVersionSeparator = $allVersions[1];
+        }
+        else {
+            $secondaryVersion = null;
+            $secondaryVersionSeparator = '-';
+        }
+
+        // extract stability part
+        $vers = explode('-', $version, 2);
         $stabilityVersion = array();
         if (count($vers) > 1) {
             $stabilityVersion = explode('.', $vers[1]);
         }
+
+        // extract version parts
         $vers = explode('.', $vers[0]);
         foreach ($vers as $k => $number) {
             if (!is_numeric($number)) {
@@ -70,7 +88,7 @@ class Parser
             }
         }
 
-        return new Version($vers, $stab, $metadata);
+        return new Version($vers, $stab, $metadata, $secondaryVersion);
     }
 
     protected static function normalizeStability($stab)

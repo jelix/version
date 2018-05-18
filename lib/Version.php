@@ -1,7 +1,7 @@
 <?php
 /**
 * @author      Laurent Jouanneau
-* @copyright   2016 Laurent Jouanneau
+* @copyright   2016-2018 Laurent Jouanneau
 *
 * @link        http://www.jelix.org
 * @licence     MIT
@@ -21,6 +21,13 @@ class Version
     private $buildMetadata = '';
 
     /**
+     * @var Version|null
+     */
+    private $secondaryVersion = null;
+
+    private $secondaryVersionSeparator = '-';
+
+    /**
      * @param int[]    $version          list of numbers of the version
      *                                   (ex: [1,2,3] for 1.2.3)
      * @param string[] $stabilityVersion list of stability informations
@@ -29,14 +36,20 @@ class Version
      * @param string  build metadata  the metadata, informations that
      *  are after a '+' in a semantic version
      *     (ex: 'build-56458' for 1.2.3-alpha.2+build-56458)
+     * 
+     * @param Version|null $secondaryVersion secondary version, i.e. a version after a ':'
      */
     public function __construct(array $version,
                                 array $stabilityVersion = array(),
-                                $buildMetadata = '')
+                                $buildMetadata = '',
+                                $secondaryVersion = null,
+                                $secondaryVersionSeparator = '-')
     {
         $this->version = $version;
         $this->stabilityVersion = $stabilityVersion;
         $this->buildMetadata = $buildMetadata;
+        $this->secondaryVersion = $secondaryVersion;
+        $this->secondaryVersionSeparator = $secondaryVersionSeparator;
     }
 
     public function __toString()
@@ -47,8 +60,9 @@ class Version
     /**
      * @param bool $withPatch true, it returns always x.y.z even
      *                        if no patch or minor version was given
+     * @param bool $withSecondaryVersion set to false to not include secondary version
      */
-    public function toString($withPatch = true)
+    public function toString($withPatch = true, $withSecondaryVersion = true)
     {
         $version = $this->version;
         if ($withPatch && count($version) < 3) {
@@ -59,6 +73,11 @@ class Version
         if ($this->stabilityVersion) {
             $vers .= '-'.implode('.', $this->stabilityVersion);
         }
+
+        if ($this->secondaryVersion && $withSecondaryVersion) {
+            $vers .= $this->secondaryVersionSeparator.$this->secondaryVersion->toString();
+        }
+
         if ($this->buildMetadata) {
             $vers .= '+'.$this->buildMetadata;
         }
@@ -126,6 +145,17 @@ class Version
     public function getBuildMetadata()
     {
         return $this->buildMetadata;
+    }
+
+    /**
+     * @return Version|null
+     */
+    public function getSecondaryVersion() {
+        return $this->secondaryVersion;
+    }
+
+    public function getSecondaryVersionSeparator() {
+        return $this->secondaryVersionSeparator;
     }
 
     /**
