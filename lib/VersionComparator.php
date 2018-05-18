@@ -93,7 +93,7 @@ class VersionComparator
                     }
                     return 1;
                 } else {
-                    return 1;
+                    return -1;
                 }
             } elseif (is_numeric($s2[$k])) {
                 return -1;
@@ -232,6 +232,7 @@ class VersionComparator
         $serial = '';
         $extensions = array_pad($extensions, 3, '0');
         foreach ($extensions as $ext) {
+            $currentUnstable = 'z';
             $vers = explode('.', $ext);
             $vers = array_pad($vers, 5, "0");
 
@@ -239,19 +240,21 @@ class VersionComparator
                 $pad = ($k > 1 ? $maxpad : 3);
                 if ($v == '*') {
                     if ($starReplacement > 0) {
-                        $vers[$k] = ($k > 1 ? 'z9999999999' : 'z999');
+                        $vers[$k] = $currentUnstable.($k > 1 ? '9999999999' : '999');
                     } else {
-                        $vers[$k] = ($k > 1 ? 'z0000000000' : 'z000');
+                        $vers[$k] = $currentUnstable.($k > 1 ? '0000000000' : '000');
                     }
                 }
                 else if (is_numeric($v)) {
-                    $vers[$k] = 'z'.str_pad($v, $pad, '0', STR_PAD_LEFT);
+                    $vers[$k] = $currentUnstable.str_pad($v, $pad, '0', STR_PAD_LEFT);
                 }
                 else if ($v == 'dev' || $v == 'pre') {
+                    $currentUnstable = '_';
                     $vers[$k] = '_'.str_pad('', $pad, '0');
                 }
                 else {
-                    $vers[$k] = strtolower(substr($v, 0, 1)).str_repeat('0', $pad);
+                    $currentUnstable = strtolower(substr($v, 0, 1));
+                    $vers[$k] = $currentUnstable.str_repeat('0', $pad);
                 }
             }
             if ($serial) {
