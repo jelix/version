@@ -27,6 +27,9 @@ class Version
 
     private $secondaryVersionSeparator = '-';
 
+    private $hasWildcardV = false;
+    private $hasWildcardSV = false;
+
     /**
      * @param int[]    $version          list of numbers of the version
      *                                   (ex: [1,2,3] for 1.2.3)
@@ -45,8 +48,11 @@ class Version
                                 $secondaryVersion = null,
                                 $secondaryVersionSeparator = '-')
     {
-        $this->version = $version;
+        $this->version = count($version) ? $version: array(0);
         $this->stabilityVersion = $stabilityVersion;
+
+        $this->hasWildcardV = in_array('*', $this->version, true);
+        $this->hasWildcardSV = in_array('*', $this->stabilityVersion, true);
         $this->buildMetadata = $buildMetadata;
         $this->secondaryVersion = $secondaryVersion;
         $this->secondaryVersionSeparator = $secondaryVersionSeparator;
@@ -65,7 +71,7 @@ class Version
     public function toString($withPatch = true, $withSecondaryVersion = true)
     {
         $version = $this->version;
-        if ($withPatch && count($version) < 3) {
+        if (!$this->hasWildcardV && $withPatch && count($version) < 3) {
             $version = array_pad($version, 3, '0');
         }
 
@@ -85,6 +91,10 @@ class Version
         return $vers;
     }
 
+    public function hasWildcard () {
+        return $this->hasWildcardSV || $this->hasWildcardV;
+    }
+
     public function getMajor()
     {
         return $this->version[0];
@@ -100,7 +110,9 @@ class Version
         if (isset($this->version[1])) {
             return $this->version[1];
         }
-
+        if ($this->version[0] === '*') {
+            return '*';
+        }
         return 0;
     }
 
@@ -114,7 +126,9 @@ class Version
         if (isset($this->version[2])) {
             return $this->version[2];
         }
-
+        if ($this->getMinor() === '*') {
+            return '*';
+        }
         return 0;
     }
 
@@ -167,19 +181,25 @@ class Version
      */
     public function getNextMajorVersion()
     {
+        if ($this->version[0] === '*') {
+            return '*';
+        }
         return ($this->version[0] + 1).'.0.0';
     }
 
     /**
      * Returns the next minor version
-     * 2.1.3 -> 2.2
-     * 2.1 -> 2.2
-     * 2.1b1.4 -> 2.2.
+     * 2.1.3 -> 2.2.0
+     * 2.1 -> 2.2.0
+     * 2.1b1.4 -> 2.1.0
      *
      * @return string the next version
      */
     public function getNextMinorVersion()
     {
+        if ($this->getMinor() === '*') {
+            return '*';
+        }
         return $this->version[0].'.'.($this->getMinor() + 1).'.0';
     }
 
@@ -192,6 +212,9 @@ class Version
      */
     public function getNextPatchVersion()
     {
+        if ($this->getPatch() === '*') {
+            return '*';
+        }
         return $this->version[0].'.'.$this->getMinor().'.'.($this->getPatch() + 1);
     }
 
@@ -209,7 +232,10 @@ class Version
             return implode('.', $this->version);
         }
         $v = $this->version;
-        ++$v[count($v) - 1];
+        $last = count($v) - 1;
+        if ($v[$last] !== '*') {
+            ++$v[$last];
+        }
 
         return implode('.', $v);
     }

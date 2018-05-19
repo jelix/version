@@ -19,11 +19,17 @@ class Parser
      * Is able to parse semantic version syntax or any other version syntax.
      *
      * @param string $version
-     *
+     * @param array $options list of options for the parser.
+     *          'removeWildcard' => true
+     * 
      * @return Version
      */
-    public static function parse($version)
+    public static function parse($version, $options = array())
     {
+        $options = array_merge(array(
+            'removeWildcard' => true
+        ), $options);
+
         // extract meta data
         $vers = explode('+', $version, 2);
         $metadata = '';
@@ -33,11 +39,17 @@ class Parser
         $version = $vers[0];
 
         // extract secondary version
-        $allVersions = preg_split('/(-|:)([0-9]+)($|\.|-)/', $version, 2, PREG_SPLIT_DELIM_CAPTURE);
+        $allVersions = preg_split('/(-|:)([0-9]+|\*)($|\.|-)/', $version, 2, PREG_SPLIT_DELIM_CAPTURE);
         $version = $allVersions[0];
         if (count($allVersions) > 1 && $allVersions[1] != '') {
-            $secondaryVersion = self::parse($allVersions[2].$allVersions[3].$allVersions[4]);
-            $secondaryVersionSeparator = $allVersions[1];
+            if ($allVersions[2] == '*' && $options['removeWildcard']) {
+                $secondaryVersion = null;
+                $secondaryVersionSeparator = '-';
+            }
+            else {
+                $secondaryVersion = self::parse($allVersions[2].$allVersions[3].$allVersions[4], $options);
+                $secondaryVersionSeparator = $allVersions[1];
+            }
         }
         else {
             $secondaryVersion = null;
@@ -66,6 +78,9 @@ class Parser
                     break;
                 } elseif ($number == '*') {
                     $vers = array_slice($vers, 0, $k);
+                    if (!$options['removeWildcard']) {
+                        $vers[$k] = '*';
+                    }
                     break;
                 } else {
                     throw new \Exception('Bad version syntax');
@@ -74,6 +89,7 @@ class Parser
                 $vers[$k] = intval($number);
             }
         }
+
         $stab = array();
         foreach ($stabilityVersion as $k => $part) {
             if (preg_match('/^[a-z]+$/', $part)) {
@@ -88,7 +104,14 @@ class Parser
             }
         }
 
-        return new Version($vers, $stab, $metadata, $secondaryVersion);
+        if (count($stab) == 0 && $secondaryVersion && !$options['removeWildcard']) {
+            if ($secondaryVersion->getMajor() == '*' && $secondaryVersionSeparator == '-') {
+                $secondaryVersion = null;
+                $stab = array('*');
+            }
+        }
+
+        return new Version($vers, $stab, $metadata, $secondaryVersion, $secondaryVersionSeparator);
     }
 
     protected static function normalizeStability($stab)
