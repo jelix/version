@@ -46,6 +46,7 @@ class parserTest extends PHPUnit_Framework_TestCase {
             array('1.2.5-*',                  1, 2, 5, array(),   array(),                        '', '1.2.5',          '1.2.6',    ''),
             array('1.2.5:*',                  1, 2, 5, array(),   array(),                        '', '1.2.5',          '1.2.6',    ''),
             array('1.2.5b1-*',                1, 2, 5, array(),   array('beta', '1'),             '', '1.2.5-beta.1',   '1.2.5',    ''),
+            array('1.7.0-rc.1',               1, 7, 0, array(),   array('rc', '1'),               '', '1.7.0-rc.1',     '1.7.0',    ''),
         );
     }
 
