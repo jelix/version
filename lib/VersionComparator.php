@@ -42,8 +42,11 @@ class VersionComparator
 
         // version comparison
         foreach ($v1 as $k => $v) {
-            if ($v == $v2[$k]) {
+            if ($v === $v2[$k]) {
                 continue;
+            }
+            if ($v === '*' || $v2[$k] === '*') {
+                break;
             }
             if ($v < $v2[$k]) {
                 return -1;
@@ -376,6 +379,7 @@ class VersionComparator
         }
         $val = trim($range);
         if (preg_match("/^([\\!>=<~^]+)(.*)$/", $val, $m)) {
+            $v1 = Parser::parse($m[2]);
             switch ($m[1]) {
                 case '=':
                     $op = versionRangeUnaryOperator::OP_EQ;
@@ -398,7 +402,6 @@ class VersionComparator
                 case '~':
                     // ~1.2 is equivalent to >=1.2 <2.0.0
                     // ~1.2.3 is equivalent to >=1.2.3 <1.3.0
-                    $v1 = Parser::parse($m[2]);
                     if ($v1->hasPatch()) {
                         $v2 = Parser::parse($v1->getNextMinorVersion().'-dev');
                     } else {
@@ -411,7 +414,6 @@ class VersionComparator
                 case '^':
                     // ^1.2.3 is equivalent to >=1.2.3 <0.3.0
                     // ^0.3    as >=0.3.0 <0.4.0
-                    $v1 = Parser::parse($m[2]);
                     $v2 = Parser::parse($v1->getNextMinorVersion().'-dev');
                     $left = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_GTE, $v1);
                     $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LT, $v2);
@@ -421,16 +423,28 @@ class VersionComparator
                     throw new \Exception('Version comparator: bad operator in the range '.$range);
             }
 
-            return new versionRangeUnaryOperator($op, Parser::parse($m[2]));
+            return new versionRangeUnaryOperator($op, $v1);
         } elseif ($val == '*') {
             return new versionRangeTrueOperator();
-        } elseif (preg_match('/^(.+)(\.\*)$/', $val, $m)) {
+        }
+
+        $v1 = Parser::parse($val);
+        if (!$v1->hasWildcard()) {
+            return new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_EQ, $v1);
+        }
+        
+
+        if (preg_match('/^(.+)(\.\*)$/', $val, $m)) {
             // 1.2.* ->  >= 1.2.0 <1.3.0
             // 1.2.3.* ->  >= 1.2.3.0 <1.2.4
-            $v1 = Parser::parse(str_replace('.*', '', $val));
             $v2 = Parser::parse($v1->getNextTailVersion());
             $left = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_GTE, $v1);
-            $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LT, $v2);
+            if ($v2->hasWildcard()) {
+                $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LTE, $v2);
+            }
+            else {
+                $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LT, $v2);
+            }
 
             return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
         }
@@ -495,6 +509,11 @@ class versionRangeBinaryOperator implements VersionRangeOperatorInterface
 
         return true;
     }
+
+    function __toString()
+    {
+        return '('.$this->left.') '.($this->op?'AND':'OR').' ('.$this->right.')';
+    }
 }
 
 /**
@@ -545,6 +564,12 @@ class versionRangeUnaryOperator implements VersionRangeOperatorInterface
 
         return false;
     }
+
+    function __toString()
+    {
+        $op = array('=', '<','>', '>=', '<=', '!=');
+        return $op[$this->op].$this->operand;
+    }
 }
 
 class versionRangeTrueOperator implements VersionRangeOperatorInterface
@@ -552,5 +577,10 @@ class versionRangeTrueOperator implements VersionRangeOperatorInterface
     public function compare(Version $value)
     {
         return true;
+    }
+
+    function __toString()
+    {
+        return 'true';
     }
 }

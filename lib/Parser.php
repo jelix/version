@@ -20,14 +20,14 @@ class Parser
      *
      * @param string $version
      * @param array $options list of options for the parser.
-     *          'removeWildcard' => true
+     *          'removeWildcard' => false
      * 
      * @return Version
      */
     public static function parse($version, $options = array())
     {
         $options = array_merge(array(
-            'removeWildcard' => true
+            'removeWildcard' => false
         ), $options);
 
         // extract meta data
@@ -39,7 +39,7 @@ class Parser
         $version = $vers[0];
 
         // extract secondary version
-        $allVersions = preg_split('/(-|:)([0-9]+|\*)($|\.|-)/', $version, 2, PREG_SPLIT_DELIM_CAPTURE);
+        $allVersions = preg_split('/(-|:)([0-9]+|\\*)($|\\.|-)/', $version, 2, PREG_SPLIT_DELIM_CAPTURE);
         $version = $allVersions[0];
         if (count($allVersions) > 1 && $allVersions[1] != '') {
             if ($allVersions[2] == '*' && $options['removeWildcard']) {
@@ -67,10 +67,17 @@ class Parser
         $vers = explode('.', $vers[0]);
         foreach ($vers as $k => $number) {
             if (!is_numeric($number)) {
-                if (preg_match('/^([0-9]+)(.*)$/', $number, $m)) {
-                    $vers[$k] = $m[1];
+                if (preg_match('/^([0-9]+)([a-zA-Z]+|\\*)([0-9]*|\\*?)(.*)$/', $number, $m)) {
+                    $vers[$k] = intval($m[1]);
+                    $sv = array($m[2]);
+                    if (isset($m[3]) && $m[3] !== '') {
+                        $sv[] = intval($m[3]);
+                    }
+                    if (isset($m[4]) && $m[4] !== '') {
+                        $sv[] = $m[4];
+                    }
                     $stabilityVersion = array_merge(
-                                            array($m[2]),
+                                            $sv,
                                             array_slice($vers, $k + 1),
                                             $stabilityVersion
                                         );
@@ -95,7 +102,7 @@ class Parser
             if (preg_match('/^[a-z]+$/', $part)) {
                 $stab[] = self::normalizeStability($part);
             } elseif (preg_match('/^[0-9]+$/', $part)) {
-                $stab[] = $part;
+                $stab[] = intval($part);
             } else {
                 $m = preg_split('/([0-9]+)/', $part, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
                 foreach ($m as $p) {

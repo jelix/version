@@ -88,7 +88,7 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(-1, '3.2.0-beta.1-1.3.11.20180413165538', '3.2.0-beta.1-1.3.11.20180413165539'),
             array(-1, '3.1.11-1.3.11.20180323171329', '3.2.0-pre.1.3.11.20180409175020'),
             array(0, '3.2beta2-1.4.0.20180516172314', '3.2-beta.2-1.4.0.20180516172314'),
-
+            array(0, '3.3rc1-1.4.4.20190425152736', '3.3-rc.1-1.4.4.20190425152736'),
         );
     }
 
@@ -104,6 +104,33 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         $v1 = Parser::parse($v1);
         $v2 = Parser::parse($v2);
         $this->assertEquals($result, VersionComparator::compare($v1,$v2));
+    }
+
+    public function getCompareVersionWildcard() {
+        $list = $this->getCompareVersion();
+        return array_merge($list, array(
+            array(0, '1.2.0', '1.2.*'),
+            array(0, '1.2.0', '1.*'),
+            array(-1, '1.2.0-rc', '1.2.*'),
+            array(0, '1.2.0-rc', '1.2.0-*'),
+            array(0, '1.2.0-beta', '1.2.0-*'),
+            array(0, '1.2.0-alpha', '1.2.0-*'),
+            array(1, '1.2.0-6.6', '1.2.*'),
+            array(0, '1.2.0-6.6', '1.2.0-*'),
+            array(0, '1.2.0-6.6', '1.2.0:*'),
+        ));
+    }
+    /**
+     * @dataProvider getCompareVersionWildcard
+     */
+    public function testCompareWildcardVersion($result, $v1, $v2) {
+        // 0 = equals
+        // -1 : v1 < v2
+        // 1 : v1 > v2
+
+        $v1 = Parser::parse($v1);
+        $v2 = Parser::parse($v2);
+        $this->assertEquals($result, VersionComparator::compare($v1, $v2));
     }
 
     protected function _compare($v1, $v2) {
@@ -321,13 +348,34 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(false, '3.0.5-1.2.0.20161107145649', '>=3.0.6-1.2.0.20161107145648'),
             array(true, '3.2beta2-1.4.0.20180516172314', '3.2.0-pre.*'),
             array(true, '3.2beta2-1.4.0.20180516172314', '3.2*'),
-            //array(true, '3.22-1.4.0.20180516172314', '3.2*'),
+            array(true, '3.2beta2-1.4.0.20180516172314', '3.2-*'),
+            array(true, '3.2.0', '3.2-*'),
+            array(true, '3.2.0-rc', '3.2-*'),
+            array(true, '3.2.0-beta', '3.2-*'),
+            array(true, '3.2.0-alpha', '3.2-*'),
+            array(false, '3.2.1', '3.2-*'),
+            array(false, '3.2beta2-1.4.0.20180516172314', '3.2.*'),
+            array(false, '3.2.4', '3.2-*'),
+            array(true, '3.2.4-dev', '3.2.4-*'),
+            array(true, '3.2.4-dev', '3.2.*-*'),
+            array(false, '3.2.4-dev', '3.2.*-rc'),
+            array(true, '3.2.4-1.2', '3.2.4-1.*'),
+            array(false, '3.22-1.4.0.20180516172314', '3.2*'),
+            array(true, '3.2-1.4.0.20180516172314', '3.2*'),
+            array(true, '3.22-1.4.0.20180516172314', '3.22.*'),
+            array(true, '3.3rc1-1.4.4.20190425152736', '3.3rc*'),
+            array(true, '3.3rc1-1.4.4.20190425152736', '3.3.*||3.3rc*'),
+            array(true, '1.5.2', '>=1.3.6'),
+            array(true, '1.5.2', '<=1.5.*'),
+            array(true, '1.5.2', '>=1.5.*'),
+            array(true, '1.5.2', '<=1.6.*'),
+            array(true, '1.5.2', '>=1.3.6,<=1.5.*'),
         );
     }
     /**
      * @dataProvider getCompareVersionRange
      */
-    public function testCompareVersionRange($result, $version, $constraints) {
+    public function testCompareRangeVersion($result, $version, $constraints) {
         if ($result) {
             $this->assertTrue(VersionComparator::compareVersionRange($version, $constraints));
         }

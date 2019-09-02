@@ -14,21 +14,33 @@ namespace Jelix\Version;
  */
 class Version
 {
+    /**
+     * @var int[] list of numbers of the version  (ex: [1,2,3] for 1.2.3)
+     */
     private $version = array();
 
+    /**
+     * @var string[] list of stability informations  (ex: ['alpha', '2'] for 1.2.3-alpha.2)
+     */
     private $stabilityVersion = array();
 
+    /**
+     * @var string any informations that are after a '+' in a semantic version
+     */
     private $buildMetadata = '';
 
     /**
-     * @var Version|null
+     * @var Version|null secondary version, i.e. a version after a ':' or a '-'
      */
     private $secondaryVersion = null;
 
     private $secondaryVersionSeparator = '-';
 
-    private $hasWildcardV = false;
-    private $hasWildcardSV = false;
+    private $wildcard = 0;
+
+    const WILDCARD_ON_VERSION = 1;
+
+    const WILDCARD_ON_STABILITY_VERSION = 2;
 
     /**
      * @param int[]    $version          list of numbers of the version
@@ -51,8 +63,12 @@ class Version
         $this->version = count($version) ? $version: array(0);
         $this->stabilityVersion = $stabilityVersion;
 
-        $this->hasWildcardV = in_array('*', $this->version, true);
-        $this->hasWildcardSV = in_array('*', $this->stabilityVersion, true);
+        if (in_array('*', $this->stabilityVersion, true)) {
+            $this->wildcard |= self::WILDCARD_ON_STABILITY_VERSION;
+        }
+        if (in_array('*', $this->version, true)) {
+            $this->wildcard |= self::WILDCARD_ON_VERSION;
+        }
         $this->buildMetadata = $buildMetadata;
         $this->secondaryVersion = $secondaryVersion;
         $this->secondaryVersionSeparator = $secondaryVersionSeparator;
@@ -71,7 +87,7 @@ class Version
     public function toString($withPatch = true, $withSecondaryVersion = true)
     {
         $version = $this->version;
-        if (!$this->hasWildcardV && $withPatch && count($version) < 3) {
+        if (!($this->wildcard & self::WILDCARD_ON_VERSION) && $withPatch && count($version) < 3) {
             $version = array_pad($version, 3, '0');
         }
 
@@ -91,8 +107,11 @@ class Version
         return $vers;
     }
 
+    /**
+     * @return integer 0 if there is no wildcard, else one of the constant WILDCARD_ON_*
+     */
     public function hasWildcard () {
-        return $this->hasWildcardSV || $this->hasWildcardV;
+        return $this->wildcard;
     }
 
     public function getMajor()
@@ -179,10 +198,13 @@ class Version
      *
      * @return string the next version
      */
-    public function getNextMajorVersion()
+    public function getNextMajorVersion($ignoreStability = true)
     {
         if ($this->version[0] === '*') {
             return '*';
+        }
+        if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
+            return implode('.', $this->version);
         }
         return ($this->version[0] + 1).'.0.0';
     }
@@ -195,25 +217,33 @@ class Version
      *
      * @return string the next version
      */
-    public function getNextMinorVersion()
+    public function getNextMinorVersion($ignoreStability = true)
     {
         if ($this->getMinor() === '*') {
             return '*';
         }
+
+        if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
+            return implode('.', $this->version);
+        }
+
         return $this->version[0].'.'.($this->getMinor() + 1).'.0';
     }
 
     /**
      * Returns the next patch version
      * 2.1.3 -> 2.1.4
-     * 2.1b1.4 -> 2.2.
+     * 2.1b1.4 -> 2.1.0
      *
      * @return string the next version
      */
-    public function getNextPatchVersion()
+    public function getNextPatchVersion($ignoreStability = true)
     {
         if ($this->getPatch() === '*') {
             return '*';
+        }
+        if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
+            return implode('.', $this->version);
         }
         return $this->version[0].'.'.$this->getMinor().'.'.($this->getPatch() + 1);
     }
@@ -226,17 +256,18 @@ class Version
      *
      * @return string the next version
      */
-    public function getNextTailVersion()
+    public function getNextTailVersion($ignoreStability = false)
     {
-        if (count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
+        if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
             return implode('.', $this->version);
         }
         $v = $this->version;
         $last = count($v) - 1;
-        if ($v[$last] !== '*') {
-            ++$v[$last];
+        if ($v[$last] == '*' && $last > 1) {
+            $v = array_slice($v, 0, $last);
+            $last --;
         }
-
+        $v[$last]++;
         return implode('.', $v);
     }
 }
