@@ -1,7 +1,7 @@
 <?php
 /**
 * @author      Laurent Jouanneau
-* @copyright   2016-2018 Laurent Jouanneau
+* @copyright   2016-2020 Laurent Jouanneau
 *
 * @link        http://www.jelix.org
 * @licence     MIT

@@ -16,6 +16,9 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
 
     public function getCompareVersion() {
         return array(
+            // 0 = equals
+            // -1 : v1 < v2
+            // 1 : v1 > v2
             array(-1, '1.0.0-alpha', '1.0.0-alpha.1'),
             array(-1, '1.0.0-alpha.1', '1.0.0-alpha.beta'),
             array(-1, '1.0.0-alpha.beta', '1.0.0-beta'),
@@ -222,7 +225,7 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(-1, $this->_compare('1.0.0-beta.2', '1.0.0-beta.11'));
         $this->assertEquals(-1, $this->_compare('1.0.0-beta.11', '1.0.0-rc.1'));
         $this->assertEquals(-1, $this->_compare('1.0.0-rc.1 ', '1.0.0'));
-        
+
         $this->assertEquals(-1, $this->_compare('1.2b1','1.2b2'));
         $this->assertEquals(-1, $this->_compare('1.2B1','1.2b2'));
         $this->assertEquals(1, $this->_compare('1.2b2','1.2b1'));
@@ -250,10 +253,10 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(-1, $this->_comparer('1.1','1.1.*'));
         $this->assertEquals(-1, $this->_compare('1.1.*','1.2'));
         $this->assertEquals(-1, $this->_compare('1.1','1.2.*'));
-        
+
         $this->assertEquals(-1, $this->_comparer('1.1','*'));
         $this->assertEquals(-1, $this->_comparel('*','1.1'));
-        
+
         $this->assertEquals(-1, $this->_compare('1.2pre','1.2a'));
         $this->assertEquals(-1, $this->_compare('1.2pre','1.2b'));
         $this->assertEquals(-1, $this->_compare('1.2pre','1.2RC'));
@@ -382,7 +385,7 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
         else {
             $this->assertFalse(VersionComparator::compareVersionRange($version, $constraints));
         }
-        
+
     }
 }
 

@@ -12,7 +12,7 @@ namespace Jelix\Version;
 /**
  * class to compare version numbers. it supports the following keywords:
  * "pre", "-dev", "b", "beta", "a", "alpha".
- * It supports also the "*" wilcard. This wilcard must be the last part
+ * It supports also the "*" wildcard. This wildcard must be the last part
  * of the version number.
  */
 class VersionComparator
@@ -56,6 +56,7 @@ class VersionComparator
         }
 
         // stability comparison
+        // dev/pre < alpha < beta < RC < stable
         $s1 = $version1->getStabilityVersion();
         $s2 = $version2->getStabilityVersion();
         if (count($s1) > count($s2)) {
@@ -335,69 +336,69 @@ class VersionComparator
             $left = self::compileRange($or[0]);
             $right = self::compileRange($or[1]);
 
-            return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_OR, $left, $right);
+            return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_OR, $left, $right);
         }
         $or = preg_split('/\s*\|\s*/', $range, 2);
         if (count($or) > 1) {
             $left = self::compileRange($or[0]);
             $right = self::compileRange($or[1]);
 
-            return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_OR, $left, $right);
+            return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_OR, $left, $right);
         }
         $and = preg_split("/\\s*,\\s*/", $range, 2);
         if (count($and) > 1) {
             $left = self::compileRange($and[0]);
             $right = self::compileRange($and[1]);
 
-            return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
+            return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_AND, $left, $right);
         }
         $and = preg_split("/(?<!-)\\s+(?!-)/", $range, 2);
         if (count($and) > 1) {
             $left = self::compileRange($and[0]);
             $right = self::compileRange($and[1]);
 
-            return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
+            return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_AND, $left, $right);
         }
         $between = preg_split("/\\s+\\-\\s+/", $range, 2);
         if (count($between) > 1) {
             // 1.0 - 2.0 is equivalent to >=1.0.0 <2.1
             // 1.0.0 - 2.1.0 is equivalent to >=1.0.0 <=2.1.0
             $v1 = Parser::parse($between[0]);
-            $left = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_GTE, $v1);
+            $left = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_GTE, $v1);
             $v2 = Parser::parse($between[1]);
             if ($v2->hasPatch()) {
-                $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LTE, $v2);
+                $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LTE, $v2);
             } elseif ($v2->hasMinor()) {
                 $v2 = Parser::parse($v2->getNextMinorVersion());
-                $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LT, $v2);
+                $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v2);
             } else {
                 $v2 = Parser::parse($v2->getNextMajorVersion());
-                $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LT, $v2);
+                $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v2);
             }
 
-            return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
+            return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_AND, $left, $right);
         }
         $val = trim($range);
         if (preg_match("/^([\\!>=<~^]+)(.*)$/", $val, $m)) {
             $v1 = Parser::parse($m[2]);
             switch ($m[1]) {
                 case '=':
-                    $op = versionRangeUnaryOperator::OP_EQ;
+                    $op = VersionRangeUnaryOperator::OP_EQ;
                     break;
                 case '<':
-                    $op = versionRangeUnaryOperator::OP_LT;
+                    $op = VersionRangeUnaryOperator::OP_LT;
                     break;
                 case '>':
-                    $op = versionRangeUnaryOperator::OP_GT;
+                    $op = VersionRangeUnaryOperator::OP_GT;
                     break;
                 case '<=':
-                    $op = versionRangeUnaryOperator::OP_LTE;
+                    $op = VersionRangeUnaryOperator::OP_LTE;
                     break;
                 case '>=':
-                    $op = versionRangeUnaryOperator::OP_GTE;
+                    $op = VersionRangeUnaryOperator::OP_GTE;
                     break;
                 case '!=':
-                    $op = versionRangeUnaryOperator::OP_DIFF;
+                    $op = VersionRangeUnaryOperator::OP_DIFF;
                     break;
                 case '~':
                     // ~1.2 is equivalent to >=1.2 <2.0.0
@@ -407,30 +408,30 @@ class VersionComparator
                     } else {
                         $v2 = Parser::parse($v1->getNextMajorVersion().'-dev');
                     }
-                    $left = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_GTE, $v1);
-                    $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LT, $v2);
+                    $left = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_GTE, $v1);
+                    $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v2);
 
-                    return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
+                    return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_AND, $left, $right);
                 case '^':
                     // ^1.2.3 is equivalent to >=1.2.3 <0.3.0
                     // ^0.3    as >=0.3.0 <0.4.0
                     $v2 = Parser::parse($v1->getNextMinorVersion().'-dev');
-                    $left = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_GTE, $v1);
-                    $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LT, $v2);
+                    $left = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_GTE, $v1);
+                    $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v2);
 
-                    return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
+                    return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_AND, $left, $right);
                 default:
                     throw new \Exception('Version comparator: bad operator in the range '.$range);
             }
 
-            return new versionRangeUnaryOperator($op, $v1);
+            return new VersionRangeUnaryOperator($op, $v1);
         } elseif ($val == '*') {
-            return new versionRangeTrueOperator();
+            return new VersionRangeTrueOperator();
         }
 
         $v1 = Parser::parse($val);
         if (!$v1->hasWildcard()) {
-            return new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_EQ, $v1);
+            return new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_EQ, $v1);
         }
         
 
@@ -438,149 +439,17 @@ class VersionComparator
             // 1.2.* ->  >= 1.2.0 <1.3.0
             // 1.2.3.* ->  >= 1.2.3.0 <1.2.4
             $v2 = Parser::parse($v1->getNextTailVersion());
-            $left = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_GTE, $v1);
+            $left = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_GTE, $v1);
             if ($v2->hasWildcard()) {
-                $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LTE, $v2);
+                $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LTE, $v2);
             }
             else {
-                $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LT, $v2);
+                $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v2);
             }
 
-            return new versionRangeBinaryOperator(versionRangeBinaryOperator::OP_AND, $left, $right);
+            return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_AND, $left, $right);
         }
 
-        return new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_EQ, Parser::parse($range));
-    }
-}
-
-interface VersionRangeOperatorInterface
-{
-    /**
-     * @return bool
-     */
-    public function compare(Version $value);
-}
-
-/**
- * Represents a binary operator (AND or OR) in a version range expression.
- */
-class versionRangeBinaryOperator implements VersionRangeOperatorInterface
-{
-    const OP_OR = 0;
-
-    const OP_AND = 1;
-
-    protected $op = -1;
-
-    protected $left = null;
-
-    protected $right = null;
-
-    /**
-     * @param int $operator one of OP_*
-     */
-    public function __construct($operator,
-                         VersionRangeOperatorInterface $left,
-                         VersionRangeOperatorInterface $right)
-    {
-        $this->op = $operator;
-        $this->left = $left;
-        $this->right = $right;
-    }
-
-    public function compare(Version $value)
-    {
-        if ($this->op == self::OP_OR) {
-            if ($this->left->compare($value)) {
-                return true;
-            }
-            if ($this->right->compare($value)) {
-                return true;
-            }
-
-            return false;
-        }
-        if (!$this->left->compare($value)) {
-            return false;
-        }
-        if (!$this->right->compare($value)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    function __toString()
-    {
-        return '('.$this->left.') '.($this->op?'AND':'OR').' ('.$this->right.')';
-    }
-}
-
-/**
- * Represents an unary operator (>,<,=,!=,<=,>=,~) in a version range expression.
- */
-class versionRangeUnaryOperator implements VersionRangeOperatorInterface
-{
-    const OP_EQ = 0;
-    const OP_LT = 1;
-    const OP_GT = 2;
-    const OP_GTE = 3;
-    const OP_LTE = 4;
-    const OP_DIFF = 5;
-
-    protected $op = -1;
-
-    protected $operand = null;
-
-    /**
-     * @param int     $operator one of OP_*
-     * @param Version $version  the version used to compare
-     */
-    public function __construct($operator, Version $version)
-    {
-        $this->op = $operator;
-        $this->operand = $version;
-    }
-
-    public function compare(Version $value)
-    {
-        $result = VersionComparator::compare($value, $this->operand);
-        switch ($this->op) {
-            case self::OP_EQ:
-                return $result === 0;
-            case self::OP_LT:
-                return $result === -1;
-            case self::OP_GT:
-                return $result === 1;
-            case self::OP_LTE:
-                return $result < 1;
-                break;
-            case self::OP_GTE:
-                return $result > -1;
-                break;
-            case self::OP_DIFF:
-                return $result != 0;
-        }
-
-        return false;
-    }
-
-    function __toString()
-    {
-        $op = array('=', '<','>', '>=', '<=', '!=');
-        return $op[$this->op].$this->operand;
-    }
-}
-
-class versionRangeTrueOperator implements VersionRangeOperatorInterface
-{
-    public function compare(Version $value)
-    {
-        return true;
-    }
-
-    function __toString()
-    {
-        return 'true';
+        return new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_EQ, Parser::parse($range));
     }
 }
