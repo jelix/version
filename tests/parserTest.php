@@ -41,6 +41,7 @@ class parserTest extends PHPUnit_Framework_TestCase {
             array('3.2beta2-1.4.0.20180516172314', 3, 2, 0, array(), array('beta', '2'),        '', '3.2.0-beta.2-1.4.0.20180516172314', '3.2' , '1.4.0.20180516172314'),
             array('3.2-beta.2-1.4.0.20180516172314', 3, 2, 0, array(), array('beta', '2'),      '', '3.2.0-beta.2-1.4.0.20180516172314', '3.2' , '1.4.0.20180516172314'),
             array('*',                        0, 0, 0, array(),   array(),                        '', '0.0.0',          '1',      ''),
+            array('1.*',                      1, 0, 0, array(),    array(),                       '', '1.0.0',          '2.0',      ''),
             array('1.2.*',                    1, 2, 0, array(),   array(),                        '', '1.2.0',          '1.3',      ''),
             array('1.2.5.*',                  1, 2, 5, array(),   array(),                        '', '1.2.5',          '1.2.6',    ''),
             array('1.2.5-*',                  1, 2, 5, array(),   array(),                        '', '1.2.5',          '1.2.6',    ''),
@@ -53,7 +54,7 @@ class parserTest extends PHPUnit_Framework_TestCase {
     /**
      * @dataProvider getVersions
      */
-    public function testVersions($version, $major, $minor, $patch, $tail, $stab, $md, $str, $nextVersion, $secondaryVersion) {
+    public function testVersionsWithoutWildcard($version, $major, $minor, $patch, $tail, $stab, $md, $str, $nextVersion, $secondaryVersion) {
         $version = Parser::parse($version, array('removeWildcard' =>true));
         $this->assertEquals($major, $version->getMajor());
         $this->assertEquals($minor, $version->getMinor());
@@ -107,6 +108,7 @@ class parserTest extends PHPUnit_Framework_TestCase {
             array('3.2beta2-1.4.0.20180516172314', 3, 2, 0, array(), array('beta', '2'),        '', '3.2.0-beta.2-1.4.0.20180516172314', '3.2' , '1.4.0.20180516172314'),
             array('3.2-beta.2-1.4.0.20180516172314', 3, 2, 0, array(), array('beta', '2'),      '', '3.2.0-beta.2-1.4.0.20180516172314', '3.2' , '1.4.0.20180516172314'),
             array('*',          '*', '*', '*', array(),    array(),             '', '*',              '*',     ''),
+            array('1.*',        1, '*', '*',    array(),    array(),             '', '1.*',            '2.0', ''),
             array('1.2.*',      1, 2, '*',     array(),    array(),             '', '1.2.*',          '1.3', ''),
             array('1.2.5.*',    1, 2, 5,       array('*'), array(),             '', '1.2.5.*',        '1.2.6', ''),
             array('1.2.5-*',    1, 2, 5,       array(),    array('*'),          '', '1.2.5-*',        '1.2.5', ''),

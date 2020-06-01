@@ -25,9 +25,9 @@ $version->getMinor(); // 2
 $version->getPatch(); // 3
 $version->getStabilityVersion(); // array('beta', '2')
 
-$version->getNextMajorVersion(); // '2.0.0'
-$version->getNextMinorVersion(); // '1.3.0'
-$version->getNextPatchVersion(); // '1.2.4'
+$version->getNextMajorVersion(); // Version object for '2.0.0'
+$version->getNextMinorVersion(); // Version object for '1.3.0'
+$version->getNextPatchVersion(); // Version object for '1.2.4'
 $version->getBranchVersion(); // '1.2'
 ```
 
@@ -56,9 +56,9 @@ $version->toString(true, false); // '1.2.3'
 $version2 = $version->getSecondaryVersion();
 $version2->toString(); // '1.4.5'
 
-$version->getNextMajorVersion(); // '2.0.0'
-$version->getNextMinorVersion(); // '1.3.0'
-$version->getNextPatchVersion(); // '1.2.4'
+$version->getNextMajorVersion(); // Version object for '2.0.0'
+$version->getNextMinorVersion(); // Version object for '1.3.0'
+$version->getNextPatchVersion(); // Version object for '1.2.4'
 $version->getBranchVersion(); // '1.2'
 
 ```

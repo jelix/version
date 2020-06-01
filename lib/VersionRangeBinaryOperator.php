@@ -19,8 +19,14 @@ class VersionRangeBinaryOperator implements VersionRangeOperatorInterface
 
     protected $op = -1;
 
+    /**
+     * @var VersionRangeOperatorInterface|null
+     */
     protected $left = null;
 
+    /**
+     * @var VersionRangeOperatorInterface|null
+     */
     protected $right = null;
 
     /**
@@ -57,7 +63,7 @@ class VersionRangeBinaryOperator implements VersionRangeOperatorInterface
         return true;
     }
 
-    function __toString()
+    public function __toString()
     {
         return '('.$this->left.') '.($this->op?'AND':'OR').' ('.$this->right.')';
     }

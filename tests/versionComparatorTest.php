@@ -14,6 +14,28 @@ use Jelix\Version\Version;
 
 class versionComparatorTest extends PHPUnit_Framework_TestCase {
 
+    public function getWildcardRangeList()
+    {
+        return array(
+                // wildcard version, range result
+          array('1.*',        '(>=1.0.0-dev) AND (<2.0.0-dev)'),
+          array('1.4.*',        '(>=1.4.0-dev) AND (<1.5.0-dev)'),
+          array('1.4.*-stable', '(>=1.4.0) AND (<1.5.0)'),
+          array('1.2.3.*', '(>=1.2.3.0-dev) AND (<1.2.4-dev)'),
+          array('1.2.*-alpha.2', '(>=1.2.0-alpha.2) AND (<1.3.0-dev)'),
+        );
+    }
+
+    /**
+     * @dataProvider getWildcardRangeList
+     */
+    public function testWildcardRange($wildcardVersion, $rangeResult)
+    {
+        $v1 = Parser::parse($wildcardVersion);
+        $this->assertEquals($rangeResult, (string) VersionComparator::getRangeFromWildcardVersion($v1));
+    }
+
+
     public function getCompareVersion() {
         return array(
             // 0 = equals
@@ -58,7 +80,7 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
 
             array(-1,'1.2RC-dev','1.2RC'),
             array(1,'1.2RC','1.2RC-dev'),
-            
+
             array(-1,'1.2pre','1.2a'),
             array(-1,'1.2pre.0','1.2a'),
             array(-1,'1.2pre','1.2b'),
@@ -357,7 +379,8 @@ class versionComparatorTest extends PHPUnit_Framework_TestCase {
             array(true, '3.2.0-beta', '3.2-*'),
             array(true, '3.2.0-alpha', '3.2-*'),
             array(false, '3.2.1', '3.2-*'),
-            array(false, '3.2beta2-1.4.0.20180516172314', '3.2.*'),
+            array(true, '3.2beta2-1.4.0.20180516172314', '3.2.*'),
+            array(false, '3.2beta2-1.4.0.20180516172314', '3.2.*-stable'),
             array(false, '3.2.4', '3.2-*'),
             array(true, '3.2.4-dev', '3.2.4-*'),
             array(true, '3.2.4-dev', '3.2.*-*'),

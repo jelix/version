@@ -299,14 +299,22 @@ class VersionComparator
      * It does not compare with secondary version.
      * 
      * @param string|Version $version a version number
-     * @param string $range   a version expression respecting Composer range syntax
+     * @param string|VersionRangeOperatorInterface $range   a version expression respecting Composer range syntax
      *
      * @return bool true if the given version match the given range
      */
     public static function compareVersionRange($version, $range)
     {
+        if (!is_string($range) & $range instanceof VersionRangeOperatorInterface) {
+            $rangeStr = (string) $range;
+        }
+        else {
+            $rangeStr = $range;
+            $range = self::compileRange($range);
+        }
 
-        if ($range == '' || $version == '') {
+
+        if ($rangeStr == '' || $version == '') {
             return true;
         }
 
@@ -317,13 +325,11 @@ class VersionComparator
             $v1 = $version;
         }
 
-        if ($v1->toString(true, false) == $range) {
+        if ($v1->toString(true, false) == $rangeStr) {
             return true;
         }
 
-        $expression = self::compileRange($range);
-
-        return $expression->compare($v1);
+        return $range->compare($v1);
     }
 
     /**
@@ -436,20 +442,73 @@ class VersionComparator
         
 
         if (preg_match('/^(.+)(\.\*)$/', $val, $m)) {
-            // 1.2.* ->  >= 1.2.0 <1.3.0
-            // 1.2.3.* ->  >= 1.2.3.0 <1.2.4
-            $v2 = Parser::parse($v1->getNextTailVersion());
-            $left = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_GTE, $v1);
-            if ($v2->hasWildcard()) {
-                $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LTE, $v2);
-            }
-            else {
-                $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v2);
-            }
-
-            return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_AND, $left, $right);
+            return self::getRangeFromWildcardVersion($v1);
         }
 
         return new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_EQ, Parser::parse($range));
     }
+
+    /**
+     * @param Version $version
+     * @return Version[]
+     * @throws \Exception
+     */
+    protected static function getBoundsFromWildcardVersion(Version $version)
+    {
+
+        $versionArr = $version->getVersionArray();
+        foreach ($versionArr as $k => $vNum) {
+            if ($vNum == '*') {
+                $versionArr[$k] = 0;
+                break;
+            }
+        }
+
+        $stability = $version->getStabilityVersion();
+        if (!count($stability)) {
+            $v2 = Parser::parse($version->getNextTailVersion());
+            $v2 = new Version($v2->getVersionArray(), array('dev'),'', $v2->getSecondaryVersion());
+            $v1 = new Version($versionArr, array('dev'),'', $version->getSecondaryVersion());
+        } else if ($stability[0] != '' && $stability[0] != 'stable') {
+            $v2 = new Version($version->getVersionArray(), array(),'', $version->getSecondaryVersion());
+            $v2 =  Parser::parse($v2->getNextTailVersion());
+            $v2 = new Version($v2->getVersionArray(), array('dev'),'', $v2->getSecondaryVersion());
+            $v1 = new Version($versionArr, $stability, '', $version->getSecondaryVersion());
+        } else {
+            $v1 = new Version($versionArr, array(), '', $version->getSecondaryVersion());
+            $v2 = Parser::parse($version->getNextTailVersion());
+        }
+
+        return array($v1, $v2);
+    }
+
+    /**
+     * @param Version $version
+     * @return VersionRangeOperatorInterface
+     * @throws \Exception
+     */
+    public static function getRangeFromWildcardVersion(Version $version)
+    {
+        // 1.4.* -> >=1.4.0.0-dev <1.5.0.0-dev
+        // 1.4.*-stable -> >=1.4.0.0 <1.5.0.0
+        // 1.2.* ->  >= 1.2.0-dev <1.3.0-dev
+        // 1.2.3.* ->  >= 1.2.3.0-dev <1.2.4-dev
+        // 1.2.*-alpha.2', '>= 1.2.0-alpha.2 <1.3.0-dev
+        list($v1, $v2) = self::getBoundsFromWildcardVersion($version);
+        return self::getRangeOperatorFromBounds($v1, $v2);
+    }
+
+    protected static function getRangeOperatorFromBounds($v1, $v2)
+    {
+        $left = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_GTE, $v1);
+        if ($v2->hasWildcard()) {
+            $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LTE, $v2);
+        }
+        else {
+            $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v2);
+        }
+
+        return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_AND, $left, $right);
+    }
+
 }

@@ -261,9 +261,10 @@ class Version
         if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
             return implode('.', $this->version);
         }
+
         $v = $this->version;
         $last = count($v) - 1;
-        if ($v[$last] == '*' && $last > 1) {
+        if ($v[$last] == '*' && $last >= 1) {
             $v = array_slice($v, 0, $last);
             $last --;
         }

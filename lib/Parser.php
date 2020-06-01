@@ -68,6 +68,8 @@ class Parser
         foreach ($vers as $k => $number) {
             if (!is_numeric($number)) {
                 if (preg_match('/^([0-9]+)([a-zA-Z]+|\\*)([0-9]*|\\*?)(.*)$/', $number, $m)) {
+                    // we got a number like '8a2', '5beta4', '3alpha*' ..
+                    // so it defines a stability version
                     $vers[$k] = intval($m[1]);
                     $sv = array($m[2]);
                     if (isset($m[3]) && $m[3] !== '') {
