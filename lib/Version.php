@@ -196,17 +196,17 @@ class Version
      * 2.1.3 -> 3.0.0
      * 2.1b1.4 -> 3.0.0.
      *
-     * @return string the next version
+     * @return Version the next version
      */
     public function getNextMajorVersion($ignoreStability = true)
     {
         if ($this->version[0] === '*') {
-            return '*';
+            return new Version(array('*'));
         }
         if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
-            return implode('.', $this->version);
+            return new Version($this->version);
         }
-        return ($this->version[0] + 1).'.0.0';
+        return new Version(array(($this->version[0] + 1), 0));
     }
 
     /**
@@ -215,19 +215,19 @@ class Version
      * 2.1 -> 2.2.0
      * 2.1b1.4 -> 2.1.0
      *
-     * @return string the next version
+     * @return Version the next version
      */
     public function getNextMinorVersion($ignoreStability = true)
     {
         if ($this->getMinor() === '*') {
-            return '*';
+            return new Version(array('*'));
         }
 
         if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
-            return implode('.', $this->version);
+            return new Version($this->version);
         }
 
-        return $this->version[0].'.'.($this->getMinor() + 1).'.0';
+        return new Version(array($this->version[0],($this->getMinor() + 1)));
     }
 
     /**
@@ -235,17 +235,17 @@ class Version
      * 2.1.3 -> 2.1.4
      * 2.1b1.4 -> 2.1.0
      *
-     * @return string the next version
+     * @return Version the next version
      */
     public function getNextPatchVersion($ignoreStability = true)
     {
         if ($this->getPatch() === '*') {
-            return '*';
+            return new Version(array('*'));
         }
         if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
-            return implode('.', $this->version);
+            return new Version($this->version);
         }
-        return $this->version[0].'.'.$this->getMinor().'.'.($this->getPatch() + 1);
+        return new Version(array($this->version[0], $this->getMinor(), ($this->getPatch() + 1)));
     }
 
     /**
@@ -254,12 +254,12 @@ class Version
      * If the version has a stability information (alpha, beta etc..),
      * it returns only the version without stability version.
      *
-     * @return string the next version
+     * @return Version the next version
      */
     public function getNextTailVersion($ignoreStability = false)
     {
         if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
-            return implode('.', $this->version);
+            return new Version($this->version);
         }
 
         $v = $this->version;
@@ -269,6 +269,6 @@ class Version
             $last --;
         }
         $v[$last]++;
-        return implode('.', $v);
+        return new Version($v);
     }
 }

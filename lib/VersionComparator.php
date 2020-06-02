@@ -375,10 +375,10 @@ class VersionComparator
             if ($v2->hasPatch()) {
                 $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LTE, $v2);
             } elseif ($v2->hasMinor()) {
-                $v2 = Parser::parse($v2->getNextMinorVersion());
+                $v2 = $v2->getNextMinorVersion();
                 $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v2);
             } else {
-                $v2 = Parser::parse($v2->getNextMajorVersion());
+                $v2 = $v2->getNextMajorVersion();
                 $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v2);
             }
 
@@ -466,17 +466,17 @@ class VersionComparator
 
         $stability = $version->getStabilityVersion();
         if (!count($stability)) {
-            $v2 = Parser::parse($version->getNextTailVersion());
+            $v2 = $version->getNextTailVersion();
             $v2 = new Version($v2->getVersionArray(), array('dev'),'', $v2->getSecondaryVersion());
             $v1 = new Version($versionArr, array('dev'),'', $version->getSecondaryVersion());
         } else if ($stability[0] != '' && $stability[0] != 'stable') {
             $v2 = new Version($version->getVersionArray(), array(),'', $version->getSecondaryVersion());
-            $v2 =  Parser::parse($v2->getNextTailVersion());
+            $v2 = $v2->getNextTailVersion();
             $v2 = new Version($v2->getVersionArray(), array('dev'),'', $v2->getSecondaryVersion());
             $v1 = new Version($versionArr, $stability, '', $version->getSecondaryVersion());
         } else {
             $v1 = new Version($versionArr, array(), '', $version->getSecondaryVersion());
-            $v2 = Parser::parse($version->getNextTailVersion());
+            $v2 = $version->getNextTailVersion();
         }
 
         return array($v1, $v2);

@@ -26,6 +26,10 @@ class Parser
      */
     public static function parse($version, $options = array())
     {
+        if ($version instanceof Version) {
+            // for backward compatibility
+            return clone $version;
+        }
         $options = array_merge(array(
             'removeWildcard' => false
         ), $options);
