@@ -45,9 +45,6 @@ class VersionComparator
             if ($v === $v2[$k]) {
                 continue;
             }
-            if ($v === '*' || $v2[$k] === '*') {
-                break;
-            }
             if ($v < $v2[$k]) {
                 return -1;
             } else {
@@ -120,6 +117,7 @@ class VersionComparator
 
         $sv1 = $version1->getSecondaryVersion();
         $sv2 = $version2->getSecondaryVersion();
+
         if (($sv1 instanceof Version) || ($sv2 instanceof Version)) {
             if (($sv1 instanceof Version) && ($sv2 instanceof Version)) {
                 return self::compare($sv1, $sv2);
@@ -313,7 +311,6 @@ class VersionComparator
             $range = self::compileRange($range);
         }
 
-
         if ($rangeStr == '' || $version == '') {
             return true;
         }
@@ -328,7 +325,6 @@ class VersionComparator
         if ($v1->toString(true, false) == $rangeStr) {
             return true;
         }
-
         return $range->compare($v1);
     }
 
@@ -419,9 +415,10 @@ class VersionComparator
 
                     return new VersionRangeBinaryOperator(VersionRangeBinaryOperator::OP_AND, $left, $right);
                 case '^':
-                    // ^1.2.3 is equivalent to >=1.2.3 <0.3.0
+                    // ^1.2.3 is equivalent to >=1.2.3 <3.0.0
                     // ^0.3    as >=0.3.0 <0.4.0
-                    $v2 = Parser::parse($v1->getNextMinorVersion().'-dev');
+                    // ^0.3.2  as >=0.3.2 <0.4.0
+                    $v2 = Parser::parse($v1->getNextMajorVersion().'-dev');
                     $left = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_GTE, $v1);
                     $right = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v2);
 
@@ -455,12 +452,10 @@ class VersionComparator
      */
     protected static function getBoundsFromWildcardVersion(Version $version)
     {
-
         $versionArr = $version->getVersionArray();
         foreach ($versionArr as $k => $vNum) {
             if ($vNum == '*') {
                 $versionArr[$k] = 0;
-                break;
             }
         }
 
@@ -495,6 +490,7 @@ class VersionComparator
         // 1.2.3.* ->  >= 1.2.3.0-dev <1.2.4-dev
         // 1.2.*-alpha.2', '>= 1.2.0-alpha.2 <1.3.0-dev
         list($v1, $v2) = self::getBoundsFromWildcardVersion($version);
+
         return self::getRangeOperatorFromBounds($v1, $v2);
     }
 
