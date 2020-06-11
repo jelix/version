@@ -65,6 +65,7 @@ class VersionRangeBinaryOperator implements VersionRangeOperatorInterface
 
     public function __toString()
     {
-        return '('.$this->left.') '.($this->op?'AND':'OR').' ('.$this->right.')';
+
+        return '('.((string)$this->left).') '.($this->op?'AND':'OR').' ('.((string)$this->right).')';
     }
 }
