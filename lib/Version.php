@@ -271,4 +271,79 @@ class Version
         $v[$last]++;
         return new Version($v);
     }
+
+    /**
+     * Returns the version having the next major stability version
+     *
+     * @return Version
+     */
+    public function getNextStabilityVersion()
+    {
+        if (!count($this->stabilityVersion) || $this->stabilityVersion[0] == 'stable') {
+            if (count($this->version) > 3) {
+                $v = $this->getNextTailVersion();
+            }
+            else {
+                $v = $this->getNextPatchVersion();
+            }
+            return new Version($v->getVersionArray(), array('dev'));
+        }
+        $stability = $this->stabilityVersion[0];
+        if ($stability == 'dev' || $stability == 'pre') {
+            $stability = 'alpha';
+        }
+        else if ($stability == 'alpha') {
+            $stability = 'beta';
+        }
+        else if ($stability == 'beta') {
+            $stability = 'rc';
+        }
+        else if ($stability == 'rc') {
+            return new Version($this->version);
+        }
+        else if (is_numeric($stability)) {
+            $stability ++;
+        }
+        return new Version($this->version, array($stability));
+    }
+
+    /**
+     * Returns the version having the next tail stability version
+     *
+     * @return Version
+     */
+    public function getNextTailStabilityVersion()
+    {
+        if (!count($this->stabilityVersion) || $this->stabilityVersion[0] == 'stable') {
+            if (count($this->version) > 3) {
+                $v = $this->getNextTailVersion();
+            }
+            else {
+                $v = $this->getNextPatchVersion();
+            }
+            return new Version($v->getVersionArray(), array('dev'));
+        }
+
+        $last = count($this->stabilityVersion) - 1;
+        $stability = $this->stabilityVersion[$last];
+        if ($stability == 'dev' || $stability == 'pre') {
+            $stability = 'alpha';
+        }
+        else if ($stability == 'alpha') {
+            $stability = 'beta';
+        }
+        else if ($stability == 'beta') {
+            $stability = 'rc';
+        }
+        else if ($stability == 'rc') {
+            return new Version($this->version);
+        }
+        else if (is_numeric($stability)) {
+            $stability ++;
+        }
+
+        $stabVer = $this->stabilityVersion;
+        $stabVer[$last] = $stability;
+        return new Version($this->version, $stabVer);
+    }
 }
