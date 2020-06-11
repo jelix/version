@@ -45,29 +45,16 @@ class Parser
         // extract secondary version
         $allVersions = preg_split('/(-|:)([0-9]+|\\*)($|\\.|-)/', $version, 2, PREG_SPLIT_DELIM_CAPTURE);
         $version = $allVersions[0];
-        if (count($allVersions) > 1 && $allVersions[1] != '') {
-            if ($allVersions[2] == '*' && $options['removeWildcard']) {
-                $secondaryVersion = null;
-                $secondaryVersionSeparator = '-';
-            }
-            else {
-                $secondaryVersion = self::parse($allVersions[2].$allVersions[3].$allVersions[4], $options);
-                $secondaryVersionSeparator = $allVersions[1];
-            }
-        }
-        else {
-            $secondaryVersion = null;
-            $secondaryVersionSeparator = '-';
-        }
+        $stabilityVersion = array();
 
         // extract stability part
         $vers = explode('-', $version, 2);
-        $stabilityVersion = array();
         if (count($vers) > 1) {
             $stabilityVersion = explode('.', $vers[1]);
         }
 
         // extract version parts
+        $versionHasWildcard = false;
         $vers = explode('.', $vers[0]);
         foreach ($vers as $k => $number) {
             if (!is_numeric($number)) {
@@ -90,6 +77,7 @@ class Parser
                     $vers = array_slice($vers, 0, $k + 1);
                     break;
                 } elseif ($number == '*') {
+                    $versionHasWildcard = true;
                     $vers = array_slice($vers, 0, $k);
                     if (!$options['removeWildcard']) {
                         $vers[$k] = '*';
@@ -99,6 +87,9 @@ class Parser
                     throw new \Exception('Bad version syntax');
                 }
             } else {
+                if ($versionHasWildcard) {
+                    throw new \Exception('Bad version syntax, wildcard should be the last part.');
+                }
                 $vers[$k] = intval($number);
             }
         }
@@ -116,12 +107,36 @@ class Parser
                 }
             }
         }
+        if ($versionHasWildcard && (count($stab) > 1 || (count($stab)==1 && $stab[0] != 'stable')) ) {
+            throw new \Exception('Bad version syntax, wildcard should be the last part.');
+        }
 
-        if (count($stab) == 0 && $secondaryVersion && !$options['removeWildcard']) {
-            if ($secondaryVersion->getMajor() == '*' && $secondaryVersionSeparator == '-') {
-                $secondaryVersion = null;
-                $stab = array('*');
+        if (count($allVersions) > 1 && $allVersions[1] != '') {
+            if ($allVersions[2] == '*') {
+
+                if ($options['removeWildcard']) {
+                    $secondaryVersion = null;
+                    $secondaryVersionSeparator = '-';
+                }
+                else {
+                    if ($allVersions[1] == '-'  && count($stab) == 0) {
+                        $stab = array('*');
+                        $secondaryVersionSeparator = ':';
+                    }
+                    else {
+                        $secondaryVersionSeparator = $allVersions[1];
+                    }
+                    $secondaryVersion = new Version(array('*'));
+                }
             }
+            else {
+                $secondaryVersion = self::parse($allVersions[2].$allVersions[3].$allVersions[4], $options);
+                $secondaryVersionSeparator = $allVersions[1];
+            }
+        }
+        else {
+            $secondaryVersion = null;
+            $secondaryVersionSeparator = '-';
         }
 
         return new Version($vers, $stab, $metadata, $secondaryVersion, $secondaryVersionSeparator);

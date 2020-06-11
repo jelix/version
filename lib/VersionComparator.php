@@ -27,6 +27,40 @@ class VersionComparator
      */
     public static function compare(Version $version1, Version $version2)
     {
+        if ($version1->hasWildcard() && $version2->hasWildcard()) {
+            throw new \Exception("Cannot compare two wildcard versions");
+        }
+        if ($version1->hasWildcard()) {
+            if ($version1->getMajor() == '*') {
+                return 0;
+            }
+            list($v1, $v2) = self::getBoundsFromWildcardVersion($version1);
+
+            if (self::compareVersionRange($version2, self::getRangeOperatorFromBounds($v1, $v2))) {
+                return 0;
+            }
+
+            $ltRange = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v1);
+            if (self::compareVersionRange($version2, $ltRange)) {
+                return 1;
+            }
+            return -1;
+        }
+        else if ($version2->hasWildcard()) {
+            if ($version2->getMajor() == '*') {
+                return 0;
+            }
+            list($v1, $v2) = self::getBoundsFromWildcardVersion($version2);
+
+            if (self::compareVersionRange($version1, self::getRangeOperatorFromBounds($v1, $v2))) {
+                return 0;
+            }
+            $ltRange = new VersionRangeUnaryOperator(VersionRangeUnaryOperator::OP_LT, $v1);
+            if (self::compareVersionRange($version1, $ltRange)) {
+                return -1;
+            }
+            return 1;
+        }
         if ($version1->toString() == $version2->toString()) {
             return 0;
         }
@@ -303,7 +337,7 @@ class VersionComparator
      */
     public static function compareVersionRange($version, $range)
     {
-        if (!is_string($range) & $range instanceof VersionRangeOperatorInterface) {
+        if (is_object($range) && $range instanceof VersionRangeOperatorInterface) {
             $rangeStr = (string) $range;
         }
         else {
@@ -464,16 +498,33 @@ class VersionComparator
             $v2 = $version->getNextTailVersion();
             $v2 = new Version($v2->getVersionArray(), array('dev'),'', $v2->getSecondaryVersion());
             $v1 = new Version($versionArr, array('dev'),'', $version->getSecondaryVersion());
-        } else if ($stability[0] != '' && $stability[0] != 'stable') {
-            $v2 = new Version($version->getVersionArray(), array(),'', $version->getSecondaryVersion());
-            $v2 = $v2->getNextTailVersion();
-            $v2 = new Version($v2->getVersionArray(), array('dev'),'', $v2->getSecondaryVersion());
-            $v1 = new Version($versionArr, $stability, '', $version->getSecondaryVersion());
         } else {
-            $v1 = new Version($versionArr, array(), '', $version->getSecondaryVersion());
-            $v2 = $version->getNextTailVersion();
+            if ($version->hasWildcard() & $version::WILDCARD_ON_STABILITY_VERSION) {
+                $majorStability = array();
+                $foundWildcard = false;
+                foreach ($stability as $k => $vNum) {
+                    if ($vNum == '*') {
+                        $stability[$k] = 0;
+                        $foundWildcard = true;
+                    }
+                    else if (!$foundWildcard) {
+                        $majorStability[$k] = $vNum;
+                    }
+                }
+                $v1 = new Version($versionArr, $stability, '', $version->getSecondaryVersion());
+                $v2 = new Version($version->getVersionArray(), $majorStability,'', $version->getSecondaryVersion());
+                $v2 = $v2->getNextStabilityVersion();
+            }
+            else if ($stability[0] !== '' && $stability[0] != 'stable') {
+                $v2 = new Version($version->getVersionArray(), array(), '', $version->getSecondaryVersion());
+                $v2 = $v2->getNextTailVersion();
+                $v2 = new Version($v2->getVersionArray(), array('dev'),'', $v2->getSecondaryVersion());
+                $v1 = new Version($versionArr, $stability, '', $version->getSecondaryVersion());
+            } else {
+                $v1 = new Version($versionArr, array(), '', $version->getSecondaryVersion());
+                $v2 = $version->getNextTailVersion();
+            }
         }
-
         return array($v1, $v2);
     }
 

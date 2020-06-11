@@ -91,14 +91,29 @@ class Version
             $version = array_pad($version, 3, '0');
         }
 
-        $vers = implode('.', $version);
+
         if ($this->stabilityVersion) {
-            $vers .= '-'.implode('.', $this->stabilityVersion);
+            $stability = '-'.implode('.', $this->stabilityVersion);
+        }
+        else {
+            $stability = '';
         }
 
         if ($this->secondaryVersion && $withSecondaryVersion) {
-            $vers .= $this->secondaryVersionSeparator.$this->secondaryVersion->toString();
+            $secondary = $this->secondaryVersion->toString();
+
+            if ($stability == '-*' && $secondary == '*') {
+                $secondary = '';
+            }
+            else {
+                $secondary = $this->secondaryVersionSeparator.$secondary;
+            }
         }
+        else {
+            $secondary = '';
+        }
+
+        $vers = implode('.', $version).$stability.$secondary;
 
         if ($this->buildMetadata) {
             $vers .= '+'.$this->buildMetadata;
