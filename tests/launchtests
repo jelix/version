@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -e
+
+export APP_USER_ID=${APP_USER_ID:-$(id -u)}
+export APP_GROUP_ID=${APP_GROUP_ID:-$(id -g)}
+export DISPLAY_ERRORS=on
+export PHP_VERSION=${PHP_VERSION:-7.4}
+
+IMAGE_NAME=version_tests-$PHP_VERSION
+SCRIPTDIR="$( cd "$(dirname "$0")" ; pwd -P )"
+
+EXEC_ARG="run -ti -e DISPLAY_ERRORS -e APP_USER_ID -e APP_GROUP_ID -v $SCRIPTDIR/../:/app/ $IMAGE_NAME "
+
+COMMAND=$1
+if [ "$COMMAND" == "" ]; then
+    docker $EXEC_ARG exec_userphp php /app/vendor/bin/phpunit
+    exit 0;
+fi
+
+shift
+
+case $COMMAND in
+    build)
+        docker build --build-arg php_version=$PHP_VERSION -t $IMAGE_NAME ./
+        if [ -d "$SCRIPTDIR/vendor" ]; then
+            docker $EXEC_ARG exec_userphp /bin/composer --working-dir=/app update
+        else
+            docker $EXEC_ARG exec_userphp /bin/composer --working-dir=/app install
+        fi
+    ;;
+    composer)
+        docker $EXEC_ARG exec_userphp /bin/composer --working-dir=/app $@
+    ;;
+    shell)
+        docker $EXEC_ARG exec_userphp /bin/bash  -l
+    ;;
+    tests)
+        docker $EXEC_ARG exec_userphp php /app/vendor/bin/phpunit $@
+    ;;
+    run)
+        docker $EXEC_ARG exec_userphp php /app/tests/$@
+    ;;
+
+esac

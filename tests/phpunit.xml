@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<phpunit>
+<phpunit convertDeprecationsToExceptions="true">
   <testsuites>
     <testsuite name="Version tools">
       <file>parserTest.php</file>
