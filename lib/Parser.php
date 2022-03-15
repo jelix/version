@@ -42,7 +42,7 @@ class Parser
         $allVersions = preg_split('/(-|:)([0-9]+|\\*)($|\\.|-)/', $version, 2, PREG_SPLIT_DELIM_CAPTURE);
         $version = $allVersions[0];
         if (count($allVersions) > 1 && $allVersions[1] != '') {
-            if ($allVersions[2] == '*' && $options['removeWildcard']) {
+            if ($allVersions[2] === '*' && $options['removeWildcard']) {
                 $secondaryVersion = null;
                 $secondaryVersionSeparator = '-';
             }
@@ -83,7 +83,7 @@ class Parser
                                         );
                     $vers = array_slice($vers, 0, $k + 1);
                     break;
-                } elseif ($number == '*') {
+                } elseif ($number === '*') {
                     $vers = array_slice($vers, 0, $k);
                     if (!$options['removeWildcard']) {
                         $vers[$k] = '*';
@@ -112,7 +112,7 @@ class Parser
         }
 
         if (count($stab) == 0 && $secondaryVersion && !$options['removeWildcard']) {
-            if ($secondaryVersion->getMajor() == '*' && $secondaryVersionSeparator == '-') {
+            if ($secondaryVersion->getMajor() === '*' && $secondaryVersionSeparator === '-') {
                 $secondaryVersion = null;
                 $stab = array('*');
             }

@@ -203,7 +203,7 @@ class Version
         if ($this->version[0] === '*') {
             return '*';
         }
-        if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
+        if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] !== 'stable') {
             return implode('.', $this->version);
         }
         return ($this->version[0] + 1).'.0.0';
@@ -242,7 +242,7 @@ class Version
         if ($this->getPatch() === '*') {
             return '*';
         }
-        if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
+        if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] !== 'stable') {
             return implode('.', $this->version);
         }
         return $this->version[0].'.'.$this->getMinor().'.'.($this->getPatch() + 1);
@@ -258,12 +258,12 @@ class Version
      */
     public function getNextTailVersion($ignoreStability = false)
     {
-        if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] != 'stable') {
+        if (!$ignoreStability && count($this->stabilityVersion) && $this->stabilityVersion[0] !== 'stable') {
             return implode('.', $this->version);
         }
         $v = $this->version;
         $last = count($v) - 1;
-        if ($v[$last] == '*' && $last > 1) {
+        if ($v[$last] === '*' && $last > 1) {
             $v = array_slice($v, 0, $last);
             $last --;
         }
