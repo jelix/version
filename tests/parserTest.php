@@ -1,7 +1,7 @@
 <?php
 /**
 * @author      Laurent Jouanneau
-* @copyright   2016 Laurent Jouanneau
+* @copyright   2016-2022 Laurent Jouanneau
 * @link        http://jelix.org
 * @licence     MIT
 */
@@ -9,7 +9,7 @@
 use Jelix\Version\Version as Version;
 use Jelix\Version\Parser as Parser;
 
-class parserTest extends PHPUnit_Framework_TestCase {
+class parserTest extends \PHPUnit\Framework\TestCase {
 
     public function getVersions() {
         return array(

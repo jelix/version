@@ -5,3 +5,4 @@ TAGS
 vendor/
 composer.lock
 .idea
+tests/.phpunit.result.cache

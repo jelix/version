@@ -2,7 +2,7 @@
 /**
 * @author      Laurent Jouanneau
 * @contributor
-* @copyright   2009-2016 Laurent Jouanneau
+* @copyright   2009-2022 Laurent Jouanneau
 * @link        http://jelix.org
 * @licence     MIT
 * @since 1.2
@@ -12,7 +12,7 @@ use Jelix\Version\VersionComparator;
 use Jelix\Version\Parser;
 use Jelix\Version\Version;
 
-class versionComparatorTest extends PHPUnit_Framework_TestCase {
+class versionComparatorTest extends \PHPUnit\Framework\TestCase {
 
     public function getCompareVersion() {
         return array(
