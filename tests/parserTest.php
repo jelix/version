@@ -49,6 +49,9 @@ class parserTest extends \PHPUnit\Framework\TestCase {
             array('1.2.5:*',                  1, 2, 5, array(),   array(),                        '', '1.2.5',          '1.2.6',    ''),
             array('1.2.5b1-*',                1, 2, 5, array(),   array('beta', '1'),             '', '1.2.5-beta.1',   '1.2.5',    ''),
             array('1.7.0-rc.1',               1, 7, 0, array(),   array('rc', '1'),               '', '1.7.0-rc.1',     '1.7.0',    ''),
+            array('3.2*',                     3, 2, 0, array(),   array(),                        '', '3.2.0',          '3.3.0',    ''),
+            array('3.4.3-pre.4356',           3, 4, 3, array(),   array('pre', '4356'),           '', '3.4.3-pre.4356',     '3.4.3',    ''),
+
         );
     }
 
@@ -112,11 +115,12 @@ class parserTest extends \PHPUnit\Framework\TestCase {
             array('1.*',        1, '*', '*',    array(),    array(),             '', '1.*',            '2.0.0', ''),
             array('1.2.*',      1, 2, '*',     array(),    array(),             '', '1.2.*',          '1.3.0', ''),
             array('1.2.5.*',    1, 2, 5,       array('*'), array(),             '', '1.2.5.*',        '1.2.6', ''),
-            array('1.2.5-*',    1, 2, 5,       array(),    array('*'),          '', '1.2.5-*',        '1.2.5', '*'),
+            array('1.2.5-*',    1, 2, 5,       array(),    array('*'),          '', '1.2.5-*',        '1.2.5', ''),
             array('1.2.5:*',    1, 2, 5,       array(),    array(),             '', '1.2.5:*',        '1.2.6', '*'),
             array('1.2.5b1-*',  1, 2, 5,       array(),    array('beta', '1'),  '', '1.2.5-beta.1-*', '1.2.5', '*'),
             array('1.2.5-beta-*',  1, 2, 5,       array(),    array('beta'),  '', '1.2.5-beta-*', '1.2.5', '*'),
             array('1.2.5-beta:*',  1, 2, 5,       array(),    array('beta'),  '', '1.2.5-beta:*', '1.2.5', '*'),
+            array('3.2*',                     3, 2, '*', array(),   array(),  '', '3.2.*',        '3.3.0',    ''),
         );
     }
 

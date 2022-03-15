@@ -62,6 +62,17 @@ class Parser
                     // we got a number like '8a2', '5beta4', '3alpha*' ..
                     // so it defines a stability version
                     $vers[$k] = intval($m[1]);
+                    if ($m[2] === '*') {
+                        if ((isset($m[3]) && $m[3] !== '') || (isset($m[4]) && $m[4] !== '')) {
+                            throw new \Exception('Bad version syntax on "'.$version.'"');
+                        }
+                        $vers = array_slice($vers, 0, $k+1);
+                        $versionHasWildcard = true;
+                        if (!$options['removeWildcard']) {
+                            $vers[$k+1] = '*';
+                        }
+                        break;
+                    }
                     $sv = array($m[2]);
                     if (isset($m[3]) && $m[3] !== '') {
                         $sv[] = intval($m[3]);
@@ -84,11 +95,11 @@ class Parser
                     }
                     break;
                 } else {
-                    throw new \Exception('Bad version syntax');
+                    throw new \Exception('Bad version syntax on "'.$version.'"');
                 }
             } else {
                 if ($versionHasWildcard) {
-                    throw new \Exception('Bad version syntax, wildcard should be the last part.');
+                    throw new \Exception('Bad version syntax on "'.$version.'", wildcard should be the last part.');
                 }
                 $vers[$k] = intval($number);
             }
@@ -108,7 +119,7 @@ class Parser
             }
         }
         if ($versionHasWildcard && (count($stab) > 1 || (count($stab)==1 && $stab[0] != 'stable')) ) {
-            throw new \Exception('Bad version syntax, wildcard should be the last part.');
+            throw new \Exception('Bad version syntax on "'.$version.'", wildcard should be the last part.');
         }
 
         if (count($allVersions) > 1 && $allVersions[1] != '') {
@@ -122,11 +133,13 @@ class Parser
                     if ($allVersions[1] == '-'  && count($stab) == 0) {
                         $stab = array('*');
                         $secondaryVersionSeparator = ':';
+                        $secondaryVersion = null;
                     }
                     else {
                         $secondaryVersionSeparator = $allVersions[1];
+                        $secondaryVersion = new Version(array('*'));
                     }
-                    $secondaryVersion = new Version(array('*'));
+
                 }
             }
             else {

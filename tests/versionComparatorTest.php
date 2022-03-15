@@ -12,6 +12,20 @@ use Jelix\Version\VersionComparator;
 use Jelix\Version\Parser;
 use Jelix\Version\Version;
 
+class VersionComparatorForTests extends VersionComparator
+{
+    public static function compileRangeForTest($range)
+    {
+        return self::compileRange($range);
+    }
+
+    public static function getBoundsFromWildcardVersionForTest(Version $version)
+    {
+        return self::getBoundsFromWildcardVersion($version);
+    }
+}
+
+
 class versionComparatorTest extends \PHPUnit\Framework\TestCase {
 
     public function getWildcardRangeList()
@@ -22,8 +36,8 @@ class versionComparatorTest extends \PHPUnit\Framework\TestCase {
             array('1.4.*',        '(>=1.4.0-dev) AND (<1.5.0-dev)'),
             array('1.4.*-stable', '(>=1.4.0) AND (<1.5.0)'),
             array('1.2.3.*', '(>=1.2.3.0-dev) AND (<1.2.4-dev)'),
-            array('1.2.*-alpha.2', '(>=1.2.0-alpha.2) AND (<1.3.0-dev)'),
-            array('1.7.0-pre.*', '(>=1.7.0-pre.0) AND (<1.7.0-alpha)')
+            array('1.7.0-pre.*', '(>=1.7.0-pre.0) AND (<1.7.0-alpha)'),
+            array('1.2.0-*', '(>=1.2.0-dev) AND (<1.2.1-dev)'),
         );
     }
 
@@ -312,6 +326,49 @@ class versionComparatorTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(0, $this->_compare('3.2.0-beta.1-1.3.11.20180413165538','3.2.0-beta.1-1.3.11.20180413165537'));
     }
 
+
+    public function getBoundsFromWildcardVersion()
+    {
+        return array(
+            array('1.2.*',   '1.2.0-dev', '1.3.0-dev'),
+            array('3.2*',    '3.2.0-dev', '3.3.0-dev'),
+            array('1.2.0-*', '1.2.0-dev', '1.2.1-dev'),
+            array('3.2-*',   '3.2.0-dev', '3.2.1-dev'),
+            array('3.2.4-*', '3.2.4-dev', '3.2.5-dev'),
+        );
+    }
+
+    /**
+     * @dataProvider getBoundsFromWildcardVersion
+     */
+    public function testBoundsFromWildcardVersion($version, $boundLeft, $boundRight)
+    {
+        $v = Parser::parse($version);
+        list($b1, $b2) = VersionComparatorForTests::getBoundsFromWildcardVersionForTest($v);
+        $this->assertEquals($boundLeft, (string)$b1);
+        $this->assertEquals($boundRight, (string)$b2);
+    }
+
+    public function getCompileRange()
+    {
+        return array(
+            array('1.2.*', '(>=1.2.0-dev) AND (<1.3.0-dev)'),
+            array('3.2*', '=3.2.*'),
+            array('1.2.0-*', '=1.2.0-*'),
+            array('3.2-*', '=3.2.0-*'),
+            array('3.2.4-*', '=3.2.4-*'),
+        );
+    }
+
+    /**
+     * @dataProvider getCompileRange
+     */
+    public function testCompileRange($range, $serializedResult)
+    {
+        $result = VersionComparatorForTests::compileRangeForTest($range);
+        $this->assertEquals($serializedResult, (string)$result);
+    }
+
     public function getCompareVersionRange() {
         return array(
             array(true,     '1.1',      '=1.1'),
@@ -419,6 +476,7 @@ class versionComparatorTest extends \PHPUnit\Framework\TestCase {
             array(true,     '1.5.2',        '<=1.6.*'),
             array(true,     '1.5.2',        '>=1.3.6,<=1.5.*'),
             array(true,     '3.3.7-pre.202005285413', '3.3.*||3.3-pre.*'),
+            array(true,     '3.3.6-pre-1.4.7.20200421101118', '>=3.3.6-pre'),
         );
     }
     /**

@@ -88,7 +88,7 @@ class Version
     {
         $version = $this->version;
         if (!($this->wildcard & self::WILDCARD_ON_VERSION) && $withPatch && count($version) < 3) {
-            $version = array_pad($version, 3, '0');
+            $version = array_pad($version, 3, 0);
         }
 
 
@@ -304,16 +304,16 @@ class Version
             return new Version($v->getVersionArray(), array('dev'));
         }
         $stability = $this->stabilityVersion[0];
-        if ($stability == 'dev' || $stability == 'pre') {
+        if ($stability === 'dev' || $stability === 'pre') {
             $stability = 'alpha';
         }
-        else if ($stability == 'alpha') {
+        else if ($stability === 'alpha') {
             $stability = 'beta';
         }
-        else if ($stability == 'beta') {
+        else if ($stability === 'beta') {
             $stability = 'rc';
         }
-        else if ($stability == 'rc') {
+        else if ($stability === 'rc') {
             return new Version($this->version);
         }
         else if (is_numeric($stability)) {
@@ -329,7 +329,7 @@ class Version
      */
     public function getNextTailStabilityVersion()
     {
-        if (!count($this->stabilityVersion) || $this->stabilityVersion[0] == 'stable') {
+        if (!count($this->stabilityVersion) || $this->stabilityVersion[0] === 'stable') {
             if (count($this->version) > 3) {
                 $v = $this->getNextTailVersion();
             }
@@ -341,16 +341,16 @@ class Version
 
         $last = count($this->stabilityVersion) - 1;
         $stability = $this->stabilityVersion[$last];
-        if ($stability == 'dev' || $stability == 'pre') {
+        if ($stability === 'dev' || $stability === 'pre') {
             $stability = 'alpha';
         }
-        else if ($stability == 'alpha') {
+        else if ($stability === 'alpha') {
             $stability = 'beta';
         }
-        else if ($stability == 'beta') {
+        else if ($stability === 'beta') {
             $stability = 'rc';
         }
-        else if ($stability == 'rc') {
+        else if ($stability === 'rc') {
             return new Version($this->version);
         }
         else if (is_numeric($stability)) {

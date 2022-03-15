@@ -31,7 +31,7 @@ class VersionComparator
             throw new \Exception("Cannot compare two wildcard versions");
         }
         if ($version1->hasWildcard()) {
-            if ($version1->getMajor() == '*') {
+            if ($version1->getMajor() === '*') {
                 return 0;
             }
             list($v1, $v2) = self::getBoundsFromWildcardVersion($version1);
@@ -47,7 +47,7 @@ class VersionComparator
             return -1;
         }
         else if ($version2->hasWildcard()) {
-            if ($version2->getMajor() == '*') {
+            if ($version2->getMajor() === '*') {
                 return 0;
             }
             list($v1, $v2) = self::getBoundsFromWildcardVersion($version2);
@@ -97,7 +97,7 @@ class VersionComparator
         }
 
         foreach ($s1 as $k => $v) {
-            if ($v == '*' || $s2[$k] == '*') {
+            if ($v === '*' || $s2[$k] === '*') {
                 return 0;
             }
             if ($v === $s2[$k]) {
@@ -133,11 +133,11 @@ class VersionComparator
             } elseif (is_numeric($s2[$k])) {
                 return -1;
             } else {
-                if ($v == 'dev' || $v == 'pre') {
+                if ($v === 'dev' || $v === 'pre') {
                     $v = 'aaaaaaaaaa';
                 }
                 $v2 = $s2[$k];
-                if ($v2 == 'dev' || $v2 == 'pre') {
+                if ($v2 === 'dev' || $v2 === 'pre') {
                     $v2 = 'aaaaaaaaaa';
                 }
                 $r = strcmp($v, $v2);
@@ -191,7 +191,7 @@ class VersionComparator
     protected static function normalizeVersionNumber(&$n)
     {
         $n[2] = strtolower($n[2]);
-        if ($n[2] == 'pre' || $n[2] == 'dev' || $n[2] == '-dev') {
+        if ($n[2] === 'pre' || $n[2] === 'dev' || $n[2] === '-dev') {
             $n[2] = '_';
             $n[3] = '';
             $n[4] = 'dev';
@@ -200,16 +200,16 @@ class VersionComparator
             $n[4] = '';
         } else {
             $n[4] = strtolower($n[4]);
-            if ($n[4] == 'pre' || $n[4] == '-dev') {
+            if ($n[4] === 'pre' || $n[4] === '-dev') {
                 $n[4] = 'dev';
             }
         }
 
-        if ($n[2] == 'a') {
+        if ($n[2] === 'a') {
             $n[2] = 'alpha';
-        } elseif ($n[2] == 'b') {
+        } elseif ($n[2] === 'b') {
             $n[2] = 'beta';
-        } elseif ($n[2] == '') {
+        } elseif ($n[2] === '') {
             $n[2] = 'zzz';
         }
     }
@@ -231,7 +231,7 @@ class VersionComparator
         $sver = '';
 
         foreach ($vers as $k => $v) {
-            if ($v == '*') {
+            if ($v === '*') {
                 --$k;
                 break;
             }
@@ -242,8 +242,8 @@ class VersionComparator
 
                 $m[1] = str_pad($m[1], ($k > 1 ? 10 : 3), '0', STR_PAD_LEFT);
                 $m[2] = substr($m[2], 0, 1); // alpha/beta
-                $m[3] = ($m[3] == '' ? '99' : str_pad($m[3], 2, '0', STR_PAD_LEFT)); // alpha/beta number
-                $m[4] = ($m[4] == 'dev' ? 'd' : 'z');
+                $m[3] = ($m[3] === '' ? '99' : str_pad($m[3], 2, '0', STR_PAD_LEFT)); // alpha/beta number
+                $m[4] = ($m[4] === 'dev' ? 'd' : 'z');
                 if ($k) {
                     $sver .= '.';
                 }
@@ -298,7 +298,7 @@ class VersionComparator
 
             foreach($vers as $k => $v) {
                 $pad = ($k > 1 ? $maxpad : 3);
-                if ($v == '*') {
+                if ($v === '*') {
                     if ($starReplacement > 0) {
                         $vers[$k] = $currentUnstable.($k > 1 ? '9999999999' : '999');
                     } else {
@@ -345,7 +345,7 @@ class VersionComparator
             $range = self::compileRange($range);
         }
 
-        if ($rangeStr == '' || $version == '') {
+        if ($rangeStr === '' || $version === '') {
             return true;
         }
 
@@ -356,7 +356,7 @@ class VersionComparator
             $v1 = $version;
         }
 
-        if ($v1->toString(true, false) == $rangeStr) {
+        if ($v1->toString(true, false) === $rangeStr) {
             return true;
         }
         return $range->compare($v1);
@@ -462,7 +462,7 @@ class VersionComparator
             }
 
             return new VersionRangeUnaryOperator($op, $v1);
-        } elseif ($val == '*') {
+        } elseif ($val === '*') {
             return new VersionRangeTrueOperator();
         }
 
@@ -488,7 +488,7 @@ class VersionComparator
     {
         $versionArr = $version->getVersionArray();
         foreach ($versionArr as $k => $vNum) {
-            if ($vNum == '*') {
+            if ($vNum === '*') {
                 $versionArr[$k] = 0;
             }
         }
@@ -503,8 +503,8 @@ class VersionComparator
                 $majorStability = array();
                 $foundWildcard = false;
                 foreach ($stability as $k => $vNum) {
-                    if ($vNum == '*') {
-                        $stability[$k] = 0;
+                    if ($vNum === '*') {
+                        $stability[$k] = ($k ==0 ?'dev': 0);
                         $foundWildcard = true;
                     }
                     else if (!$foundWildcard) {
@@ -515,7 +515,7 @@ class VersionComparator
                 $v2 = new Version($version->getVersionArray(), $majorStability,'', $version->getSecondaryVersion());
                 $v2 = $v2->getNextStabilityVersion();
             }
-            else if ($stability[0] !== '' && $stability[0] != 'stable') {
+            else if ($stability[0] !== '' && $stability[0] !== 'stable') {
                 $v2 = new Version($version->getVersionArray(), array(), '', $version->getSecondaryVersion());
                 $v2 = $v2->getNextTailVersion();
                 $v2 = new Version($v2->getVersionArray(), array('dev'),'', $v2->getSecondaryVersion());
