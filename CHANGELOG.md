@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.1.2
+-----
+
+VersionComparator: Fix comparison with range that is a wildcard version.
+
+
 1.1.1
 -----
 
