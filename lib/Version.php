@@ -263,11 +263,12 @@ class Version
         }
         $v = $this->version;
         $last = count($v) - 1;
-        if ($v[$last] === '*' && $last > 1) {
+        if ($v[$last] === '*' && $last > 0) {
             $v = array_slice($v, 0, $last);
             $last --;
         }
         $v[$last]++;
         return implode('.', $v);
     }
+
 }

@@ -435,9 +435,10 @@ class VersionComparator
         
 
         if (preg_match('/^(.+)(\.\*)$/', $val, $m)) {
-            // 1.2.* ->  >= 1.2.0 <1.3.0
-            // 1.2.3.* ->  >= 1.2.3.0 <1.2.4
-            $v2 = Parser::parse($v1->getNextTailVersion());
+            // 1.* -> >=1.0.0 <2.0.0-dev
+            // 1.2.* ->  >= 1.2.0 <1.3.0-dev
+            // 1.2.3.* ->  >= 1.2.3.0 <1.2.4-dev
+            $v2 = Parser::parse($v1->getNextTailVersion(true).'-dev');
             $left = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_GTE, $v1);
             if ($v2->hasWildcard()) {
                 $right = new versionRangeUnaryOperator(versionRangeUnaryOperator::OP_LTE, $v2);

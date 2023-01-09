@@ -10,7 +10,20 @@
 
 use Jelix\Version\VersionComparator;
 use Jelix\Version\Parser;
-use Jelix\Version\Version;
+
+
+class VersionComparatorForTest extends VersionComparator
+{
+    /**
+     * @param $range
+     * @return \Jelix\Version\versionRangeBinaryOperator|\Jelix\Version\VersionRangeOperatorInterface|\Jelix\Version\versionRangeTrueOperator|\Jelix\Version\versionRangeUnaryOperator
+     * @throws Exception
+     */
+    public static function compileRangeForTest($range) {
+        return self::compileRange($range);
+    }
+}
+
 
 class versionComparatorTest extends \PHPUnit\Framework\TestCase {
 
@@ -269,6 +282,26 @@ class versionComparatorTest extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(0, $this->_compare('3.2.0-beta.1-1.3.11.20180413165538','3.2.0-beta.1-1.3.11.20180413165537'));
     }
 
+
+    public function getTestDataForRangeCompiler()
+    {
+        return array(
+            [ '3.6.*', '(>=3.6.*) AND (<3.7.0-dev)' ],
+            [ '1.*', '(>=1.*) AND (<2.0.0-dev)']
+        );
+    }
+
+    /**
+     * @dataProvider getTestDataForRangeCompiler
+     */
+    public function testRangeCompiler($rangeStr, $expectedResult)
+    {
+
+        $result = VersionComparatorForTest::compileRangeForTest($rangeStr);
+        $this->assertEquals($expectedResult, (string) $result);
+
+    }
+
     public function getCompareVersionRange() {
         return array(
             array(true,     '1.1',  '=1.1'),
@@ -370,8 +403,17 @@ class versionComparatorTest extends \PHPUnit\Framework\TestCase {
             array(true, '1.5.2', '>=1.5.*'),
             array(true, '1.5.2', '<=1.6.*'),
             array(true, '1.5.2', '>=1.3.6,<=1.5.*'),
+            array(false, '3.7.0-dev', '3.6.*'),
+            array(false, '3.7.0-dev', '3.6.0-pre.*'),
+            array(false, '3.7.0-dev', '3.6.0-alpha.*'),
+            array(false, '3.7.0-dev', '3.6.0-beta.*'),
+            array(false, '3.7.0-dev', '3.6.0-rc.*'),
+            array(false, '3.7.0-dev', '3.6.*||3.6.0-pre.*||3.6.0-alpha.*||3.6.0-beta.*||3.6.0-rc.*'),
+            array(true, '3.7.0-dev', '3.7.*||3.7.0-pre.*||3.7.0-alpha.*||3.7.0-beta.*||3.7.0-rc.*')
+
         );
     }
+
     /**
      * @dataProvider getCompareVersionRange
      */
