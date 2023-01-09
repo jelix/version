@@ -477,6 +477,13 @@ class versionComparatorTest extends \PHPUnit\Framework\TestCase {
             array(true,     '1.5.2',        '>=1.3.6,<=1.5.*'),
             array(true,     '3.3.7-pre.202005285413', '3.3.*||3.3-pre.*'),
             array(true,     '3.3.6-pre-1.4.7.20200421101118', '>=3.3.6-pre'),
+            array(false, '3.7.0-dev', '3.6.*'),
+            array(false, '3.7.0-dev', '3.6.0-pre.*'),
+            array(false, '3.7.0-dev', '3.6.0-alpha.*'),
+            array(false, '3.7.0-dev', '3.6.0-beta.*'),
+            array(false, '3.7.0-dev', '3.6.0-rc.*'),
+            array(false, '3.7.0-dev', '3.6.*||3.6.0-pre.*||3.6.0-alpha.*||3.6.0-beta.*||3.6.0-rc.*'),
+            array(true, '3.7.0-dev', '3.7.*||3.7.0-pre.*||3.7.0-alpha.*||3.7.0-beta.*||3.7.0-rc.*')
         );
     }
     /**
